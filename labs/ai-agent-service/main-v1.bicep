@@ -27,7 +27,7 @@ param apimLoggerName string = 'apim-logger'
 // Creates Azure dependent resources for Azure AI studio
 
 @description('Azure region of the deployment')
-param location string = resourceGroup().location
+param location string = 'swedencentral'
 
 param weatherAPIPath string = 'weatherservice'
 param placeOrderAPIPath string = 'orderservice'

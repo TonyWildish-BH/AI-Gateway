@@ -1,4 +1,8 @@
 <!-- /policies -->
+<!--
+    Model names below are {placeholders} substituted by main.bicep from the central
+    catalogue (shared/models.json). Never write a literal model name in this file.
+-->
 <policies>
     <inbound>
         <base />
@@ -18,22 +22,21 @@
                            : (string)context.Variables["model"] )" />
         <!-- 2. Decide what to do with the request -->
         <choose>
-            <!-- route tier-1 GPT-4.1 -->
-            <when condition="@( ((string)context.Variables["requestedModel"]) == "gpt-4.1")">
+            <!-- route tier-1 (catalogue role chat-standard) -->
+            <when condition="@( ((string)context.Variables["requestedModel"]) == "{model-tier1}")">
                 <set-backend-service backend-id="foundry1" />
             </when>
-            <when condition="@( ((string)context.Variables["requestedModel"]) == "gpt-4.1-mini" 
-                         || ((string)context.Variables["requestedModel"]) == "gpt-4.1-nano")">
+            <when condition="@( ((string)context.Variables["requestedModel"]) == "{model-tier2-small}" 
+                         || ((string)context.Variables["requestedModel"]) == "{model-tier2-nano}")">
                 <set-backend-service backend-id="foundry2" />
             </when>
-            <when condition="@( ((string)context.Variables["requestedModel"]) == "model-router"
-                            || ((string)context.Variables["requestedModel"]) == "gpt-5"
-                            || ((string)context.Variables["requestedModel"]) == "DeepSeek-R1")">
+            <when condition="@( ((string)context.Variables["requestedModel"]) == "{router-tier-model}"
+                            || ((string)context.Variables["requestedModel"]) == "{model-tier3}")">
                 <set-backend-service backend-id="foundry3" />
             </when>
-            <!-- gate any GPT-4o* variants -->
+            <!-- gate the retired model family named by {model-blocked} -->
             <when condition="@( ((string)context.Variables["requestedModel"] ?? string.Empty)
-                           .StartsWith("gpt-4o"))">
+                           .StartsWith("{model-blocked}"))">
                 <return-response>
                     <set-status code="403" reason="Forbidden" />
                     <set-body>@("{\"error\":\"Model '" + (string)context.Variables["requestedModel"] + "' is not permitted.\"}")</set-body>

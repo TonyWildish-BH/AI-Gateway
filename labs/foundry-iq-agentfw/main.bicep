@@ -24,7 +24,7 @@ param inferenceAPIPath string = 'inference'
 param foundryProjectName string = 'default'
 
 @description('AI Search service location')
-param searchServiceLocation string = resourceGroup().location
+param searchServiceLocation string = 'swedencentral'
 
 @description('AI Search service SKU')
 param searchServiceSku string = 'standard'

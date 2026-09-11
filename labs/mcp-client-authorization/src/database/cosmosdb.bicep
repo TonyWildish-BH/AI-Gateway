@@ -12,7 +12,7 @@
 param cosmosDbAccountName string
 
 @description('The location of the Cosmos DB account. Defaults to the resource group location.')
-param location string = resourceGroup().location
+param location string = 'swedencentral'
 
 @description('The name of the database')
 param databaseName string = 'mcpoauth'

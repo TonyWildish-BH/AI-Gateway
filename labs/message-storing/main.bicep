@@ -12,7 +12,7 @@ param inferenceAPIPath string = 'inference' // Path to the inference API in the 
 param foundryProjectName string = 'default'
 
 @description('Event Hub namespace location')
-param eventHubLocation string = resourceGroup().location
+param eventHubLocation string = 'swedencentral'
 
 @description('Event Hub SKU')
 param eventHubSKU string = 'Standard'

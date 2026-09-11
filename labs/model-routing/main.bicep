@@ -11,6 +11,23 @@ param inferenceAPIPath string = 'inference' // Path to the inference API in the 
 param foundryProjectName string = 'default'
 
 // ------------------
+//    VARIABLES
+// ------------------
+
+// policy.xml routes on the model name the client asks for, so those names must match
+// what is actually deployed. They are {placeholders} in the XML and are filled in here
+// from the central catalogue (shared/models.json) - never hardcoded in the policy.
+var modelCatalogPath = '../../shared/models.json'
+var routedPolicyXml = replace(replace(replace(replace(replace(replace(
+  loadTextContent('policy.xml'),
+  '{model-tier1}',       loadJsonContent(modelCatalogPath, '$.foundry.chat-standard.name')),
+  '{model-tier2-small}', loadJsonContent(modelCatalogPath, '$.foundry.chat-small.name')),
+  '{model-tier2-nano}',  loadJsonContent(modelCatalogPath, '$.foundry.chat-nano.name')),
+  '{router-tier-model}',  loadJsonContent(modelCatalogPath, '$.foundry.router.name')),
+  '{model-tier3}',       loadJsonContent(modelCatalogPath, '$.foundry.deepseek-chat.name')),
+  '{model-blocked}',      'gpt-4o')  // model-catalog-allow: blocklist demo - a retired family the gateway refuses; deliberately NOT a catalogue role, because the point is that it is no longer deployable
+
+// ------------------
 //    RESOURCES
 // ------------------
 
@@ -55,7 +72,7 @@ module foundryModule '../../modules/cognitive-services/v3/foundry.bicep' = {
 module inferenceAPIModule '../../modules/apim/v2/inference-api.bicep' = {
   name: 'inferenceAPIModule'
   params: {
-    policyXml: loadTextContent('policy.xml')
+    policyXml: routedPolicyXml
     apimLoggerId: apimModule.outputs.loggerId
     appInsightsId: appInsightsModule.outputs.id
     appInsightsInstrumentationKey: appInsightsModule.outputs.instrumentationKey

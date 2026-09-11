@@ -22,8 +22,9 @@ param acaLocation string = 'swedencentral'
 @description('The SGLang Docker image to deploy')
 param sglangImage string = 'lmsysorg/sglang:latest'
 
+// Resolved from the central catalogue (shared/models.json), role external['sglang-llama'].
 @description('The model path for SGLang to serve (HuggingFace model ID)')
-param sglangModelPath string = 'meta-llama/Llama-3.1-8B-Instruct'
+param sglangModelPath string = loadJsonContent('../../shared/models.json', '$.external.sglang-llama.name')
 
 @description('The HuggingFace token for accessing gated models')
 @secure()

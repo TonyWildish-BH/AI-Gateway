@@ -41,6 +41,175 @@ def get_current_subscription():
         print_error(f"Error retrieving current subscription: {e}")
         return None
 
+MODEL_CATALOG_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'models.json')
+
+# Keys that describe the model itself and are therefore owned by the catalog.
+# Anything else a lab passes (capacity, aiservice, policies, meter SKUs, ...) is lab-specific.
+MODEL_CATALOG_KEYS = ('name', 'publisher', 'version', 'sku')
+
+_model_catalog = None
+
+def load_model_catalog(catalog_path = None):
+    global _model_catalog
+
+    if catalog_path is None and _model_catalog is not None:
+        return _model_catalog
+
+    path = catalog_path or MODEL_CATALOG_PATH
+    try:
+        with open(path, 'r', encoding='utf-8') as catalog_file:
+            catalog = json.load(catalog_file)
+    except FileNotFoundError:
+        raise FileNotFoundError(f"Model catalog not found at '{path}'. It should live at shared/models.json.")
+    except json.JSONDecodeError as e:
+        raise ValueError(f"Model catalog '{path}' is not valid JSON: {e}")
+
+    if 'foundry' not in catalog:
+        raise ValueError(f"Model catalog '{path}' is missing the 'foundry' section.")
+
+    if catalog_path is None:
+        _model_catalog = catalog
+
+    return catalog
+
+def get_model(role, catalog_path = None):
+    """Resolve a catalog role (or a literal model name via the alias table) to its definition."""
+    catalog = load_model_catalog(catalog_path)
+    foundry = catalog['foundry']
+
+    resolved_role = role
+    if resolved_role not in foundry:
+        resolved_role = catalog.get('aliases', {}).get(role)
+        if resolved_role is None or resolved_role not in foundry:
+            available = ', '.join(sorted(r for r in foundry if not r.startswith('$')))
+            raise KeyError(f"Unknown model role '{role}'. Available roles: {available}")
+        print_warning(f"'{role}' is a literal model name; use the role '{resolved_role}' instead so deprecations stay a one-line change")
+
+    return resolved_role, foundry[resolved_role]
+
+def model_name(role, catalog_path = None):
+    """Return just the deployment name for a role, for use in client calls and URLs."""
+    return get_model(role, catalog_path)[1]['name']
+
+def external_model_name(role, catalog_path = None):
+    """Return the model name for a role in the catalog's 'external' section.
+
+    External models (AWS Bedrock, Google Gemini, Ollama, self-hosted SLMs) are not
+    deployed through Azure Cognitive Services, so they carry no publisher/version/sku
+    and cannot go through get_model()/models_config().
+    """
+    external = load_model_catalog(catalog_path).get('external', {})
+    if role not in external or role.startswith('$'):
+        available = ', '.join(sorted(r for r in external if not r.startswith('$')))
+        raise KeyError(f"Unknown external model role '{role}'. Available roles: {available}")
+
+    return external[role]['name']
+
+def models_config(*requested, catalog_path = None):
+    """Build a models_config array from catalog roles.
+
+    Each argument is either a role name, or a (role, overrides) tuple where overrides
+    supplies lab-specific values such as capacity, aiservice or policies:
+
+        models_config = utils.models_config(('chat-small', {"capacity": 20}))
+        models_config = utils.models_config(
+            ('chat-standard', {"capacity": 20, "aiservice": "foundry1"}),
+            ('chat-nano',     {"capacity": 20, "aiservice": "foundry2"}),
+        )
+    """
+    resolved = []
+    non_ga = []
+
+    for entry in requested:
+        if isinstance(entry, str):
+            role, overrides = entry, {}
+        else:
+            role, overrides = entry
+
+        resolved_role, definition = get_model(role, catalog_path)
+
+        model = {key: definition[key] for key in MODEL_CATALOG_KEYS}
+        model['capacity'] = definition.get('defaultCapacity', 20)
+        model.update(overrides)
+        resolved.append(model)
+
+        lifecycle = definition.get('lifecycle')
+        if lifecycle and lifecycle != 'GenerallyAvailable':
+            non_ga.append((resolved_role, model['name'], lifecycle, definition.get('notes', '')))
+
+    for resolved_role, name, lifecycle, notes in non_ga:
+        print_warning(f"Model '{name}' (role '{resolved_role}') is '{lifecycle}' as of {load_model_catalog(catalog_path).get('lifecycleCheckedOn', 'the last catalog refresh')}. {notes}".strip())
+
+    return resolved
+
+def validate_model_definitions(subscription_id, location, models_config):
+    if not subscription_id:
+        raise ValueError("Missing subscription ID parameter.")
+    if not location:
+        raise ValueError("Missing Azure region parameter.")
+
+    url = (
+        f"https://management.azure.com/subscriptions/{subscription_id}"
+        f"/providers/Microsoft.CognitiveServices/locations/{location}/models"
+        "?api-version=2024-10-01"
+    )
+    output = run(
+        f'az rest --method get --url "{url}" --output json',
+        "Retrieved the regional model catalog",
+        "Failed to retrieve the regional model catalog",
+    )
+    if not output.success or not isinstance(output.json_data, dict):
+        raise RuntimeError("Unable to validate model definitions from the regional model catalog.")
+
+    catalog = output.json_data.get("value", [])
+    for requested_model in models_config:
+        model_name = requested_model.get("name")
+        model_version = requested_model.get("version")
+        model_sku = requested_model.get("sku")
+        requested_capacity = requested_model.get("capacity", 0)
+        matches = [
+            entry.get("model", {})
+            for entry in catalog
+            if entry.get("model", {}).get("format") == requested_model.get("publisher", requested_model.get("format"))
+            and entry.get("model", {}).get("name") == model_name
+            and entry.get("model", {}).get("version") == model_version
+        ]
+
+        if not matches:
+            raise RuntimeError(
+                f"Model '{model_name}' version '{model_version}' is not available in '{location}'."
+            )
+
+        active_matches = [
+            model for model in matches
+            if model.get("lifecycleStatus") == "GenerallyAvailable"
+        ]
+        if not active_matches:
+            status = matches[0].get("lifecycleStatus", "unknown")
+            raise RuntimeError(
+                f"Model '{model_name}' version '{model_version}' is not deployable in '{location}'; "
+                f"its lifecycle status is '{status}'."
+            )
+
+        sku_matches = [
+            sku for model in active_matches for sku in model.get("skus", [])
+            if sku.get("name") == model_sku
+        ]
+        if not sku_matches:
+            raise RuntimeError(
+                f"Model '{model_name}' version '{model_version}' does not support SKU '{model_sku}' in '{location}'."
+            )
+
+        maximum_capacity = sku_matches[0].get("capacity", {}).get("maximum")
+        if maximum_capacity is not None and requested_capacity > maximum_capacity:
+            raise RuntimeError(
+                f"Model '{model_name}' SKU '{model_sku}' supports a maximum capacity of "
+                f"{maximum_capacity}, but {requested_capacity} was requested."
+            )
+
+    print_ok(f"Validated {len(models_config)} model definition(s) in '{location}'")
+    return True
+
 # Retrieves resources in a resource group
 def get_resources(resource_group_name, config):
     if not resource_group_name:

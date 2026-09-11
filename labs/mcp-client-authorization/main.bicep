@@ -31,7 +31,7 @@ param encryptionKey string
 @description('The MCP client ID')
 param mcpClientId string
 
-param location string = resourceGroup().location
+param location string = 'swedencentral'
 
 param weatherAPIPath string = 'weather'
 

@@ -8,8 +8,9 @@ param apimSku string = 'Basicv2'
 @description('Configuration array for APIM subscriptions')
 param apimSubscriptionsConfig array = []
 
+// Resolved from the central catalogue (shared/models.json), role external['ollama-embed'].
 @description('The Ollama model to pull on startup')
-param ollamaModel string = 'mxbai-embed-large'
+param ollamaModel string = loadJsonContent('../../shared/models.json', '$.external.ollama-embed.name')
 
 @description('CPU cores for the ACI container')
 param aciCpu int = 2
@@ -24,7 +25,7 @@ param aciMemoryInGB int = 8
 var resourceSuffix = uniqueString(subscription().id, resourceGroup().id)
 var apiManagementName = 'apim-${resourceSuffix}'
 var containerGroupName = 'aci-ollama-${resourceSuffix}'
-var location = resourceGroup().location
+var location = 'swedencentral'
 
 // ------------------
 //    RESOURCES

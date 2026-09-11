@@ -55,8 +55,9 @@ param foundryAgentName string
 @description('AWS region for the Bedrock backend, e.g. "us-east-1".')
 param bedrockRegion string = 'us-east-1'
 
+// Resolved from the central catalogue (shared/models.json), role external['bedrock-nova-lite'].
 @description('Bedrock inference profile model id, e.g. "us.amazon.nova-2-lite-v1:0".')
-param bedrockModelId string = 'us.amazon.nova-2-lite-v1:0'
+param bedrockModelId string = loadJsonContent('../../shared/models.json', '$.external.bedrock-nova-lite.name')
 
 @secure()
 @description('AWS IAM access key id with bedrock:InvokeModel permission. Stored as an APIM secure named value.')
@@ -103,6 +104,11 @@ var dceName           = 'dce-${resourceSuffix}'
 var contentDcrName    = 'dcr-aigwcontent-${resourceSuffix}'
 var contentTableName  = 'AIGatewayContent_CL'
 var contentStreamName = 'Custom-${contentTableName}'
+
+// Resolved from the central catalogue (shared/models.json), role foundry['chat-standard'].
+// Used only in the Foundry API description so the deployed resource never carries a stale
+// model name. The JSONPath argument keeps the compiled template free of the whole catalogue.
+var foundryChatModelName = loadJsonContent('../../shared/models.json', '$.foundry.chat-standard.name')
 
 // Built-in role IDs
 var monitoringMetricsPublisherRoleId = '3913510d-42f4-4e42-8a64-420c390055eb'
@@ -330,6 +336,18 @@ resource nvBedrockModelId 'Microsoft.ApiManagement/service/namedValues@2024-05-0
   }
 }
 
+// Model label reported to Purview by foundry-hrpolicy.policy.xml. Named value rather
+// than a literal so it always tracks the model deployed from shared/models.json.
+resource nvFoundryModelName 'Microsoft.ApiManagement/service/namedValues@2024-05-01' = {
+  parent: apim
+  name: 'foundry-model-name'
+  properties: {
+    displayName: 'foundry-model-name'
+    value: foundryChatModelName
+    secret: false
+  }
+}
+
 resource nvAwsAccessKey 'Microsoft.ApiManagement/service/namedValues@2024-05-01' = {
   parent: apim
   name: 'aws-access-key'
@@ -396,7 +414,7 @@ resource foundryApi 'Microsoft.ApiManagement/service/apis@2024-06-01-preview' = 
   name: 'foundry-hrpolicy'
   properties: {
     apiType: 'http'
-    description: 'Foundry gpt-4.1 backend fronted by APIM with Purview DLP at Gate 1 (uploadText) and Gate 3 (downloadText).'
+    description: 'Foundry ${foundryChatModelName} backend fronted by APIM with Purview DLP at Gate 1 (uploadText) and Gate 3 (downloadText).'
     displayName: 'Foundry HR Policy'
     format: 'openapi+json'
     path: foundryApiPath
@@ -423,6 +441,7 @@ resource foundryApiPolicy 'Microsoft.ApiManagement/service/apis/policies@2024-06
   dependsOn: [
     fragmentPurview
     fragmentEmitLog
+    nvFoundryModelName
   ]
 }
 

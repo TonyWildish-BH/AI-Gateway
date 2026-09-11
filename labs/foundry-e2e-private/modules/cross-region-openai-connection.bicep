@@ -28,10 +28,10 @@ param customSubDomainName string = ''
 
 // Model deployment parameters
 @description('Model name to deploy')
-param modelName string = 'gpt-4o'
+param modelName string = loadJsonContent('../../../shared/models.json', '$.foundry.chat-4o.name')
 
 @description('Model version')
-param modelVersion string = '2024-11-20'
+param modelVersion string = loadJsonContent('../../../shared/models.json', '$.foundry.chat-4o.version')
 
 @description('Model SKU')
 param modelSkuName string = 'GlobalStandard'

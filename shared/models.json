@@ -1,0 +1,283 @@
+{
+  "$comment": [
+    "Central model catalogue for all AI-Gateway labs.",
+    "When a model is deprecated, change it HERE ONCE - every lab, Bicep template and",
+    "Terraform config resolves through this file.",
+    "",
+    "Labs refer to models by ROLE (the keys under 'foundry'/'external'), never by",
+    "literal model name. Python:    utils.models_config(('chat-small', {'capacity': 20}))",
+    "                     Bicep:    loadJsonContent('../../shared/models.json')",
+    "                     Terraform: jsondecode(file('../../shared/models.json'))",
+    "",
+    "'lifecycle' mirrors the Azure Cognitive Services regional model catalogue as of",
+    "'lifecycleCheckedOn'. It is advisory metadata only - the authoritative check is",
+    "utils.validate_model_definitions(), which queries Azure live at deployment time.",
+    "Re-check with: python scripts/refresh_model_lifecycle.py",
+    "",
+    "2026-09-11 deprecation sweep: every Legacy/Deprecating/Deprecated role was moved to",
+    "its GA successor (gpt-4.1* -> gpt-5*, gpt-4o* -> gpt-5*, DeepSeek-R1 ->",
+    "DeepSeek-V3.2-Speciale). The gpt-5 family is a reasoning family: it rejects",
+    "'max_tokens' (use 'max_completion_tokens') and rejects 'temperature' other than the",
+    "default. Labs were updated to match. The only non-GA roles left are moonshot-*,",
+    "where the whole MoonshotAI line is Preview and there is nothing GA to move to."
+  ],
+  "lifecycleCheckedOn": "2026-09-11",
+  "lifecycleCheckedIn": ["uksouth", "swedencentral", "eastus2", "westus3"],
+
+  "foundry": {
+    "chat-small": {
+      "name": "gpt-5-mini",
+      "publisher": "OpenAI",
+      "version": "2025-08-07",
+      "sku": "GlobalStandard",
+      "defaultCapacity": 20,
+      "lifecycle": "GenerallyAvailable",
+      "notes": "Default small chat workhorse - by far the most used role. Was gpt-4.1-mini until the 2026-09-11 sweep; gpt-4.1-mini went Legacy."
+    },
+    "chat-standard": {
+      "name": "gpt-5",
+      "publisher": "OpenAI",
+      "version": "2025-08-07",
+      "sku": "GlobalStandard",
+      "defaultCapacity": 20,
+      "lifecycle": "GenerallyAvailable",
+      "notes": "Was gpt-4.1 until the 2026-09-11 sweep; gpt-4.1 went Legacy."
+    },
+    "chat-nano": {
+      "name": "gpt-5-nano",
+      "publisher": "OpenAI",
+      "version": "2025-08-07",
+      "sku": "GlobalStandard",
+      "defaultCapacity": 20,
+      "lifecycle": "GenerallyAvailable",
+      "notes": "Cheapest tier, used for routing demos. Was gpt-4.1-nano until the 2026-09-11 sweep."
+    },
+    "chat-4o": {
+      "name": "gpt-5",
+      "publisher": "OpenAI",
+      "version": "2025-08-07",
+      "sku": "GlobalStandard",
+      "defaultCapacity": 30,
+      "lifecycle": "GenerallyAvailable",
+      "notes": "LEGACY ROLE ALIAS - now identical to chat-standard/chat-flagship. Kept so the cross-region deployment in foundry-e2e-private and the hub-based agent lab keep resolving without edits. Use chat-standard in new labs. Was gpt-4o 2024-11-20 until the 2026-09-11 sweep."
+    },
+    "chat-small-4o": {
+      "name": "gpt-5-mini",
+      "publisher": "OpenAI",
+      "version": "2025-08-07",
+      "sku": "GlobalStandard",
+      "defaultCapacity": 20,
+      "lifecycle": "GenerallyAvailable",
+      "notes": "LEGACY ROLE ALIAS - now identical to chat-small/chat-flagship-mini. Use chat-small in new labs. Was gpt-4o-mini 2024-07-18 (Deprecating) until the 2026-09-11 sweep. gpt-5-mini has no regional 'Standard' SKU, so labs that pinned sku='Standard' now take the catalogue GlobalStandard."
+    },
+    "chat-flagship": {
+      "name": "gpt-5",
+      "publisher": "OpenAI",
+      "version": "2025-08-07",
+      "sku": "GlobalStandard",
+      "defaultCapacity": 20,
+      "lifecycle": "GenerallyAvailable"
+    },
+    "chat-flagship-mini": {
+      "name": "gpt-5-mini",
+      "publisher": "OpenAI",
+      "version": "2025-08-07",
+      "sku": "GlobalStandard",
+      "defaultCapacity": 20,
+      "lifecycle": "GenerallyAvailable"
+    },
+    "chat-frontier": {
+      "name": "gpt-5.2",
+      "publisher": "OpenAI",
+      "version": "2025-12-11",
+      "sku": "GlobalStandard",
+      "defaultCapacity": 100,
+      "lifecycle": "GenerallyAvailable",
+      "notes": "Consolidation candidate with chat-frontier-plus / chat-frontier-sol - these three roles differ only by when the lab was written."
+    },
+    "chat-frontier-plus": {
+      "name": "gpt-5.4",
+      "publisher": "OpenAI",
+      "version": "2026-03-05",
+      "sku": "GlobalStandard",
+      "defaultCapacity": 2000,
+      "lifecycle": "GenerallyAvailable"
+    },
+    "chat-frontier-sol": {
+      "name": "gpt-5.6-sol",
+      "publisher": "OpenAI",
+      "version": "2026-07-09",
+      "sku": "GlobalStandard",
+      "defaultCapacity": 50,
+      "lifecycle": "GenerallyAvailable"
+    },
+    "router": {
+      "name": "model-router",
+      "publisher": "OpenAI",
+      "version": "2025-11-18",
+      "sku": "GlobalStandard",
+      "defaultCapacity": 20,
+      "lifecycle": "GenerallyAvailable",
+      "notes": "Publisher is OpenAI, NOT Microsoft. Version 2025-05-19 and 2025-08-07 are Preview only; 2025-11-18 is the GA release."
+    },
+    "embed-small": {
+      "name": "text-embedding-3-small",
+      "publisher": "OpenAI",
+      "version": "1",
+      "sku": "GlobalStandard",
+      "defaultCapacity": 20,
+      "lifecycle": "GenerallyAvailable"
+    },
+    "embed-large": {
+      "name": "text-embedding-3-large",
+      "publisher": "OpenAI",
+      "version": "1",
+      "sku": "GlobalStandard",
+      "defaultCapacity": 120,
+      "lifecycle": "GenerallyAvailable"
+    },
+    "realtime": {
+      "name": "gpt-realtime",
+      "publisher": "OpenAI",
+      "version": "2025-08-28",
+      "sku": "GlobalStandard",
+      "defaultCapacity": 10,
+      "lifecycle": "GenerallyAvailable",
+      "notes": "Not offered in uksouth - labs using this role pin a region that offers it (e.g. swedencentral, eastus2)."
+    },
+    "realtime-mini": {
+      "name": "gpt-realtime-mini",
+      "publisher": "OpenAI",
+      "version": "2025-10-06",
+      "sku": "GlobalStandard",
+      "defaultCapacity": 10,
+      "lifecycle": "GenerallyAvailable",
+      "notes": "Not offered in uksouth. A newer 2025-12-15 version is also GA."
+    },
+    "image-gen": {
+      "name": "gpt-image-2",
+      "publisher": "OpenAI",
+      "version": "2026-04-21",
+      "sku": "GlobalStandard",
+      "defaultCapacity": 1,
+      "lifecycle": "GenerallyAvailable",
+      "notes": "Not offered in uksouth."
+    },
+    "image-edit": {
+      "name": "FLUX.1-Kontext-pro",
+      "publisher": "Black Forest Labs",
+      "version": "1",
+      "sku": "GlobalStandard",
+      "defaultCapacity": 1,
+      "lifecycle": "GenerallyAvailable"
+    },
+    "deepseek-chat": {
+      "name": "DeepSeek-V3.2",
+      "publisher": "DeepSeek",
+      "version": "1",
+      "sku": "GlobalStandard",
+      "defaultCapacity": 100,
+      "lifecycle": "GenerallyAvailable"
+    },
+    "deepseek-reasoning": {
+      "name": "DeepSeek-V3.2-Speciale",
+      "publisher": "DeepSeek",
+      "version": "1",
+      "sku": "GlobalStandard",
+      "defaultCapacity": 1,
+      "lifecycle": "GenerallyAvailable",
+      "notes": "Reasoning-tuned sibling of deepseek-chat, so the role keeps its meaning. Was DeepSeek-R1 until the 2026-09-11 sweep; R1 and R1-0528 are Deprecated and Azure refuses to deploy them."
+    },
+    "slm": {
+      "name": "Phi-4",
+      "publisher": "Microsoft",
+      "version": "3",
+      "sku": "GlobalStandard",
+      "defaultCapacity": 1,
+      "lifecycle": "GenerallyAvailable",
+      "notes": "Versions 2-7 are all GA; 3 is what the labs pin."
+    },
+    "moonshot-chat": {
+      "name": "Kimi-K2.6",
+      "publisher": "MoonshotAI",
+      "version": "2026-04-20",
+      "sku": "GlobalStandard",
+      "defaultCapacity": 50,
+      "lifecycle": "Preview",
+      "notes": "Preview, and deliberately so - every MoonshotAI model in the Azure catalogue is Preview, so there is no GA target to sweep to. utils.validate_model_definitions() rejects non-GA models, so do not add that call to a lab using this role."
+    },
+    "moonshot-code": {
+      "name": "Kimi-K2.7-Code",
+      "publisher": "MoonshotAI",
+      "version": "2026-06-12",
+      "sku": "GlobalStandard",
+      "defaultCapacity": 20,
+      "lifecycle": "Preview",
+      "notes": "Version is 2026-06-12. 2026-04-20 belongs to Kimi-K2.6 and does not exist for this model. Preview with no GA target - see moonshot-chat."
+    }
+  },
+
+  "external": {
+    "$comment": "Models not deployed through Azure Cognitive Services. Not covered by validate_model_definitions().",
+    "bedrock-claude-haiku": {
+      "name": "anthropic.claude-3-5-haiku-20241022-v1:0",
+      "provider": "AWS Bedrock"
+    },
+    "bedrock-nova-lite": {
+      "name": "us.amazon.nova-2-lite-v1:0",
+      "provider": "AWS Bedrock"
+    },
+    "gemini-flash": {
+      "name": "gemini-3-flash-preview",
+      "provider": "Google Gemini"
+    },
+    "gemini-flash-25": {
+      "name": "gemini-2.5-flash",
+      "provider": "Google Gemini"
+    },
+    "gemini-flash-20": {
+      "name": "gemini-2.0-flash",
+      "provider": "Google Gemini"
+    },
+    "ollama-embed": {
+      "name": "mxbai-embed-large",
+      "provider": "Ollama"
+    },
+    "sglang-llama": {
+      "name": "meta-llama/Llama-3.1-8B-Instruct",
+      "provider": "Hugging Face / SGLang"
+    },
+    "slm-phi35": {
+      "name": "phi-3.5-mini",
+      "provider": "Self-hosted SLM"
+    }
+  },
+
+  "aliases": {
+    "$comment": "Literal model name -> role. Used by scripts/check_model_catalog.py to tell contributors which role to use, and accepted by utils.models_config() so a literal name still resolves. Retired literals (gpt-4.1*, gpt-4o*, DeepSeek-R1) are kept on purpose: they still map to the role that replaced them, so old code resolves to the successor instead of failing, and the guard can name the right role in its error message.",
+    "gpt-4.1-mini": "chat-small",
+    "gpt-4.1": "chat-standard",
+    "gpt-4.1-nano": "chat-nano",
+    "gpt-4o-mini": "chat-small-4o",
+    "gpt-4o": "chat-4o",
+    "gpt-5": "chat-flagship",
+    "gpt-5-mini": "chat-flagship-mini",
+    "gpt-5-nano": "chat-nano",
+    "gpt-5.2": "chat-frontier",
+    "gpt-5.4": "chat-frontier-plus",
+    "gpt-5.6-sol": "chat-frontier-sol",
+    "model-router": "router",
+    "text-embedding-3-small": "embed-small",
+    "text-embedding-3-large": "embed-large",
+    "gpt-realtime": "realtime",
+    "gpt-realtime-mini": "realtime-mini",
+    "gpt-image-2": "image-gen",
+    "FLUX.1-Kontext-pro": "image-edit",
+    "DeepSeek-V3.2": "deepseek-chat",
+    "DeepSeek-V3.2-Speciale": "deepseek-reasoning",
+    "DeepSeek-R1": "deepseek-reasoning",
+    "Phi-4": "slm",
+    "Kimi-K2.6": "moonshot-chat",
+    "Kimi-K2.7-Code": "moonshot-code"
+  }
+}

@@ -5,7 +5,7 @@
 // Typically, parameters would be decorated with appropriate metadata and attributes, but as they are very repetetive in these labs we omit them for brevity.
 
 param apicsku string = 'Free'
-param location string = resourceGroup().location
+param location string = 'swedencentral'
 param apicServiceName string
 
 

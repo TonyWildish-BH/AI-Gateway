@@ -117,7 +117,7 @@ class AutoGenAgent(AbstractAgent):
             Union[OpenAIChatCompletionClient, AzureOpenAIChatCompletionClient]
         ] = None,
         # …or let the agent build a default OpenAIChatCompletionClient via these:
-        model: str = "gpt-4o",
+        model: str = "gpt-5-mini",  # model-catalog-allow: container entrypoint baked into the agent image, shared/utils.py is not available at runtime; every caller passes the deployment name resolved from shared/models.json by the notebook
         api_key: str | None = None,
         # Network/auth
         http_headers: dict[str, str] | None = None,

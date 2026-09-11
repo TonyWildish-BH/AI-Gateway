@@ -14,7 +14,7 @@
     - - -
         content-direction              "Prompt" | "Response"
         content-backend                "Foundry" | "Bedrock"
-        content-model                  e.g. "gpt-4.1"
+        content-model                  set from the {{foundry-model-name}} / {{bedrock-model-id}} named values
         content-user                   UPN parsed from X-User-Token
         content-correlation-id         GUID linking prompt + response rows
         content-text                   the raw prompt or response text

@@ -5,7 +5,7 @@ variable "resource_group_name" {
 
 variable "resource_group_location" {
   type    = string
-  default = "westeurope"
+  default = "swedencentral"
 }
 
 variable "aiservices_backend_pool_name" {
@@ -17,7 +17,7 @@ variable "aiservices_config" {
   default = {
     aiservices-uks = {
       name     = "foundry1",
-      location = "uksouth",
+      location = "swedencentral",
       priority = 1,
       weight   = 100
     },
@@ -29,16 +29,19 @@ variable "aiservices_config" {
     },
     aiservices-frc = {
       name     = "foundry3",
-      location = "francecentral",
+      location = "swedencentral",
       priority = 2,
       weight   = 50
     }
   }
 }
 
+# Model identity comes from the central catalogue (shared/models.json), role
+# 'chat-small-4o'. Leave these empty to use the catalogue value; set them only to
+# deliberately override it. See the `locals` block in main.tf.
 variable "model_deployment_name" {
   type    = string
-  default = "gpt-4o-mini"
+  default = ""
 }
 
 variable "aiservices_sku" {
@@ -48,12 +51,12 @@ variable "aiservices_sku" {
 
 variable "model_name" {
   type    = string
-  default = "gpt-4o-mini"
+  default = ""
 }
 
 variable "model_version" {
   type    = string
-  default = "2024-07-18"
+  default = ""
 }
 
 variable "model_capacity" {
@@ -73,7 +76,7 @@ variable "apim_resource_name" {
 
 variable "apim_resource_location" {
   type    = string
-  default = "westeurope" # APIM SKU StandardV2 is not yet supported in the region Sweden Central
+  default = "swedencentral"
 }
 
 variable "apim_sku" {

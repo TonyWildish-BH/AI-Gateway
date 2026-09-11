@@ -13,7 +13,7 @@ param openAIModelSKU string
 param openAIDeploymentName string
 param openAIAPIVersion string = '2024-02-01'
 
-param location string = resourceGroup().location
+param location string = 'swedencentral'
 
 param weatherAPIPath string = 'weather'
 param oncallAPIPath string = 'oncall'

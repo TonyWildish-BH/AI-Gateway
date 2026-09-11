@@ -17,9 +17,9 @@
       "vieiraae",
       "nourshaker-msft"
     ],
-    "githubPath": "https://github.com/Azure-Samples/AI-Gateway/tree/main/labs/access-controlling",
+    "githubPath": "https://github.com/TonyWildish-BH/AI-Gateway/tree/main/labs/access-controlling",
     "tags": [],
-    "lastCommitDate": "2026-06-23T13:28:02.170Z"
+    "lastCommitDate": "2026-09-11T18:26:40.807Z"
   },
   {
     "id": "ai-agent-service",
@@ -38,9 +38,9 @@
       "vieiraae",
       "nourshaker-msft"
     ],
-    "githubPath": "https://github.com/Azure-Samples/AI-Gateway/tree/main/labs/ai-agent-service",
+    "githubPath": "https://github.com/TonyWildish-BH/AI-Gateway/tree/main/labs/ai-agent-service",
     "tags": [],
-    "lastCommitDate": "2026-06-23T13:28:02.171Z"
+    "lastCommitDate": "2026-09-11T18:11:23.408Z"
   },
   {
     "id": "ai-foundry-deepseek",
@@ -59,9 +59,9 @@
     "authors": [
       "vieiraae"
     ],
-    "githubPath": "https://github.com/Azure-Samples/AI-Gateway/tree/main/labs/ai-foundry-deepseek",
+    "githubPath": "https://github.com/TonyWildish-BH/AI-Gateway/tree/main/labs/ai-foundry-deepseek",
     "tags": [],
-    "lastCommitDate": "2026-06-23T13:28:02.172Z"
+    "lastCommitDate": "2026-09-11T18:11:23.408Z"
   },
   {
     "id": "ai-foundry-hosted-agents",
@@ -82,8 +82,8 @@
       "nourshaker-msft"
     ],
     "tags": [],
-    "githubPath": "https://github.com/Azure-Samples/AI-Gateway/tree/main/labs/ai-foundry-hosted-agents",
-    "lastCommitDate": "2026-03-02T11:38:30.603Z"
+    "githubPath": "https://github.com/TonyWildish-BH/AI-Gateway/tree/main/labs/ai-foundry-hosted-agents",
+    "lastCommitDate": "2026-09-11T18:26:40.808Z"
   },
   {
     "id": "ai-foundry-hosted-agents-custom-framework",
@@ -104,8 +104,8 @@
       "georgeollis"
     ],
     "tags": [],
-    "githubPath": "https://github.com/Azure-Samples/AI-Gateway/tree/main/labs/ai-foundry-hosted-agents-custom-framework",
-    "lastCommitDate": "2026-07-10T17:20:32.613Z"
+    "githubPath": "https://github.com/TonyWildish-BH/AI-Gateway/tree/main/labs/ai-foundry-hosted-agents-custom-framework",
+    "lastCommitDate": "2026-09-11T18:11:23.408Z"
   },
   {
     "id": "ai-foundry-model-gateway",
@@ -131,8 +131,8 @@
       "APIM Gateway",
       "Enterprise AI"
     ],
-    "githubPath": "https://github.com/Azure-Samples/AI-Gateway/tree/main/labs/ai-foundry-model-gateway",
-    "lastCommitDate": "2026-06-23T13:28:02.172Z"
+    "githubPath": "https://github.com/TonyWildish-BH/AI-Gateway/tree/main/labs/ai-foundry-model-gateway",
+    "lastCommitDate": "2026-09-11T18:11:23.409Z"
   },
   {
     "id": "ai-foundry-private-mcp",
@@ -157,8 +157,8 @@
       "nourshaker-msft"
     ],
     "tags": [],
-    "githubPath": "https://github.com/Azure-Samples/AI-Gateway/tree/main/labs/ai-foundry-private-mcp",
-    "lastCommitDate": "2026-06-23T13:28:02.173Z"
+    "githubPath": "https://github.com/TonyWildish-BH/AI-Gateway/tree/main/labs/ai-foundry-private-mcp",
+    "lastCommitDate": "2026-09-11T18:11:23.409Z"
   },
   {
     "id": "ai-foundry-sdk",
@@ -176,9 +176,9 @@
     "authors": [
       "vieiraae"
     ],
-    "githubPath": "https://github.com/Azure-Samples/AI-Gateway/tree/main/labs/ai-foundry-sdk",
+    "githubPath": "https://github.com/TonyWildish-BH/AI-Gateway/tree/main/labs/ai-foundry-sdk",
     "tags": [],
-    "lastCommitDate": "2026-06-23T13:28:02.174Z"
+    "lastCommitDate": "2026-09-11T18:11:23.410Z"
   },
   {
     "id": "ai-foundry-toolbox",
@@ -198,8 +198,8 @@
       "georgeollis"
     ],
     "tags": [],
-    "githubPath": "https://github.com/Azure-Samples/AI-Gateway/tree/main/labs/ai-foundry-toolbox",
-    "lastCommitDate": "2026-07-24T10:50:22.024Z"
+    "githubPath": "https://github.com/TonyWildish-BH/AI-Gateway/tree/main/labs/ai-foundry-toolbox",
+    "lastCommitDate": "2026-09-11T18:11:23.410Z"
   },
   {
     "id": "aigw-foundry-models",
@@ -220,8 +220,8 @@
       "vieiraae"
     ],
     "tags": [],
-    "githubPath": "https://github.com/Azure-Samples/AI-Gateway/tree/main/labs/aigw-foundry-models",
-    "lastCommitDate": "2026-07-29T14:13:17.339Z"
+    "githubPath": "https://github.com/TonyWildish-BH/AI-Gateway/tree/main/labs/aigw-foundry-models",
+    "lastCommitDate": "2026-09-11T18:11:23.410Z"
   },
   {
     "id": "apim-purview-dlp",
@@ -242,8 +242,8 @@
       "inwafula"
     ],
     "tags": [],
-    "githubPath": "https://github.com/Azure-Samples/AI-Gateway/tree/main/labs/apim-purview-dlp",
-    "lastCommitDate": "2026-08-07T10:31:30.874Z"
+    "githubPath": "https://github.com/TonyWildish-BH/AI-Gateway/tree/main/labs/apim-purview-dlp",
+    "lastCommitDate": "2026-09-11T18:11:23.410Z"
   },
   {
     "id": "aws-bedrock",
@@ -261,9 +261,9 @@
     "authors": [
       "vieiraae"
     ],
-    "githubPath": "https://github.com/Azure-Samples/AI-Gateway/tree/main/labs/aws-bedrock",
+    "githubPath": "https://github.com/TonyWildish-BH/AI-Gateway/tree/main/labs/aws-bedrock",
     "tags": [],
-    "lastCommitDate": "2026-06-23T13:28:02.175Z"
+    "lastCommitDate": "2026-09-11T18:11:23.410Z"
   },
   {
     "id": "azure-ml-models",
@@ -285,8 +285,8 @@
       "jonesethan"
     ],
     "tags": [],
-    "githubPath": "https://github.com/Azure-Samples/AI-Gateway/tree/main/labs/azure-ml-models",
-    "lastCommitDate": "2026-06-23T13:28:02.175Z"
+    "githubPath": "https://github.com/TonyWildish-BH/AI-Gateway/tree/main/labs/azure-ml-models",
+    "lastCommitDate": "2026-09-11T18:26:40.808Z"
   },
   {
     "id": "backend-pool-load-balancing",
@@ -304,9 +304,9 @@
     "authors": [
       "vieiraae"
     ],
-    "githubPath": "https://github.com/Azure-Samples/AI-Gateway/tree/main/labs/backend-pool-load-balancing",
+    "githubPath": "https://github.com/TonyWildish-BH/AI-Gateway/tree/main/labs/backend-pool-load-balancing",
     "tags": [],
-    "lastCommitDate": "2026-06-23T13:28:02.176Z"
+    "lastCommitDate": "2026-09-11T18:11:23.411Z"
   },
   {
     "id": "backend-pool-load-balancing-tf",
@@ -323,9 +323,9 @@
     "authors": [
       "vieiraae"
     ],
-    "githubPath": "https://github.com/Azure-Samples/AI-Gateway/tree/main/labs/backend-pool-load-balancing-tf",
+    "githubPath": "https://github.com/TonyWildish-BH/AI-Gateway/tree/main/labs/backend-pool-load-balancing-tf",
     "tags": [],
-    "lastCommitDate": "2026-02-19T12:42:08.761Z"
+    "lastCommitDate": "2026-09-11T18:11:23.411Z"
   },
   {
     "id": "built-in-logging",
@@ -343,9 +343,9 @@
     "authors": [
       "vieiraae"
     ],
-    "githubPath": "https://github.com/Azure-Samples/AI-Gateway/tree/main/labs/built-in-logging",
+    "githubPath": "https://github.com/TonyWildish-BH/AI-Gateway/tree/main/labs/built-in-logging",
     "tags": [],
-    "lastCommitDate": "2026-06-23T13:28:02.176Z"
+    "lastCommitDate": "2026-09-11T18:11:23.411Z"
   },
   {
     "id": "content-safety",
@@ -363,9 +363,9 @@
     "authors": [
       "vieiraae"
     ],
-    "githubPath": "https://github.com/Azure-Samples/AI-Gateway/tree/main/labs/content-safety",
+    "githubPath": "https://github.com/TonyWildish-BH/AI-Gateway/tree/main/labs/content-safety",
     "tags": [],
-    "lastCommitDate": "2026-06-23T13:28:02.177Z"
+    "lastCommitDate": "2026-09-11T18:26:40.809Z"
   },
   {
     "id": "finops-framework",
@@ -385,9 +385,9 @@
     "authors": [
       "vieiraae"
     ],
-    "githubPath": "https://github.com/Azure-Samples/AI-Gateway/tree/main/labs/finops-framework",
+    "githubPath": "https://github.com/TonyWildish-BH/AI-Gateway/tree/main/labs/finops-framework",
     "tags": [],
-    "lastCommitDate": "2026-06-23T13:28:02.177Z"
+    "lastCommitDate": "2026-09-11T18:26:40.809Z"
   },
   {
     "id": "foundry-e2e-private",
@@ -411,8 +411,8 @@
       "duongthaiha"
     ],
     "tags": [],
-    "githubPath": "https://github.com/Azure-Samples/AI-Gateway/tree/main/labs/foundry-e2e-private",
-    "lastCommitDate": "2026-06-23T13:28:02.177Z"
+    "githubPath": "https://github.com/TonyWildish-BH/AI-Gateway/tree/main/labs/foundry-e2e-private",
+    "lastCommitDate": "2026-09-11T18:11:23.412Z"
   },
   {
     "id": "foundry-iq-agent-svc",
@@ -433,8 +433,8 @@
       "nourshaker-msft"
     ],
     "tags": [],
-    "githubPath": "https://github.com/Azure-Samples/AI-Gateway/tree/main/labs/foundry-iq-agent-svc",
-    "lastCommitDate": "2026-06-23T13:28:02.178Z"
+    "githubPath": "https://github.com/TonyWildish-BH/AI-Gateway/tree/main/labs/foundry-iq-agent-svc",
+    "lastCommitDate": "2026-09-11T18:11:23.412Z"
   },
   {
     "id": "foundry-iq-agentfw",
@@ -455,8 +455,8 @@
       "nourshaker-msft"
     ],
     "tags": [],
-    "githubPath": "https://github.com/Azure-Samples/AI-Gateway/tree/main/labs/foundry-iq-agentfw",
-    "lastCommitDate": "2026-06-23T13:28:02.178Z"
+    "githubPath": "https://github.com/TonyWildish-BH/AI-Gateway/tree/main/labs/foundry-iq-agentfw",
+    "lastCommitDate": "2026-09-11T18:11:23.413Z"
   },
   {
     "id": "foundry-models-evals",
@@ -476,8 +476,8 @@
       "vieiraae"
     ],
     "tags": [],
-    "githubPath": "https://github.com/Azure-Samples/AI-Gateway/tree/main/labs/foundry-models-evals",
-    "lastCommitDate": "2026-06-23T13:28:02.178Z"
+    "githubPath": "https://github.com/TonyWildish-BH/AI-Gateway/tree/main/labs/foundry-models-evals",
+    "lastCommitDate": "2026-09-11T18:11:23.413Z"
   },
   {
     "id": "function-calling",
@@ -517,9 +517,9 @@
     "authors": [
       "nourshaker-msft"
     ],
-    "githubPath": "https://github.com/Azure-Samples/AI-Gateway/tree/main/labs/gemini-mcp-agents",
+    "githubPath": "https://github.com/TonyWildish-BH/AI-Gateway/tree/main/labs/gemini-mcp-agents",
     "tags": [],
-    "lastCommitDate": "2026-06-23T13:28:02.179Z"
+    "lastCommitDate": "2026-09-11T18:11:23.413Z"
   },
   {
     "id": "gemini-models",
@@ -539,8 +539,8 @@
       "vieiraae"
     ],
     "tags": [],
-    "githubPath": "https://github.com/Azure-Samples/AI-Gateway/tree/main/labs/gemini-models",
-    "lastCommitDate": "2026-06-23T13:28:02.179Z"
+    "githubPath": "https://github.com/TonyWildish-BH/AI-Gateway/tree/main/labs/gemini-models",
+    "lastCommitDate": "2026-09-11T18:11:23.413Z"
   },
   {
     "id": "ghcp-byok-foundry",
@@ -565,8 +565,8 @@
       "nourshaker-msft"
     ],
     "tags": [],
-    "githubPath": "https://github.com/Azure-Samples/AI-Gateway/tree/main/labs/ghcp-byok-foundry",
-    "lastCommitDate": "2026-07-06T10:25:14.677Z"
+    "githubPath": "https://github.com/TonyWildish-BH/AI-Gateway/tree/main/labs/ghcp-byok-foundry",
+    "lastCommitDate": "2026-09-11T18:11:23.413Z"
   },
   {
     "id": "google-gemini-api",
@@ -586,8 +586,8 @@
       "seilorjunior"
     ],
     "tags": [],
-    "githubPath": "https://github.com/Azure-Samples/AI-Gateway/tree/main/labs/google-gemini-api",
-    "lastCommitDate": "2026-06-23T13:28:02.179Z"
+    "githubPath": "https://github.com/TonyWildish-BH/AI-Gateway/tree/main/labs/google-gemini-api",
+    "lastCommitDate": "2026-09-11T18:11:23.413Z"
   },
   {
     "id": "image-generation",
@@ -605,9 +605,9 @@
     "authors": [
       "nourshaker-msft"
     ],
-    "githubPath": "https://github.com/Azure-Samples/AI-Gateway/tree/main/labs/image-generation",
+    "githubPath": "https://github.com/TonyWildish-BH/AI-Gateway/tree/main/labs/image-generation",
     "tags": [],
-    "lastCommitDate": "2026-06-23T13:28:02.180Z"
+    "lastCommitDate": "2026-09-11T18:11:23.413Z"
   },
   {
     "id": "mcp-a2a-agents",
@@ -629,9 +629,9 @@
     "authors": [
       "nourshaker-msft"
     ],
-    "githubPath": "https://github.com/Azure-Samples/AI-Gateway/tree/main/labs/mcp-a2a-agents",
+    "githubPath": "https://github.com/TonyWildish-BH/AI-Gateway/tree/main/labs/mcp-a2a-agents",
     "tags": [],
-    "lastCommitDate": "2026-06-23T13:28:02.182Z"
+    "lastCommitDate": "2026-09-11T18:11:23.414Z"
   },
   {
     "id": "mcp-client-authorization",
@@ -667,9 +667,9 @@
     "authors": [
       "vieiraae"
     ],
-    "githubPath": "https://github.com/Azure-Samples/AI-Gateway/tree/main/labs/mcp-from-api",
+    "githubPath": "https://github.com/TonyWildish-BH/AI-Gateway/tree/main/labs/mcp-from-api",
     "tags": [],
-    "lastCommitDate": "2026-06-23T13:28:02.184Z"
+    "lastCommitDate": "2026-09-11T18:11:23.414Z"
   },
   {
     "id": "mcp-prm-oauth",
@@ -751,9 +751,9 @@
     "authors": [
       "vieiraae"
     ],
-    "githubPath": "https://github.com/Azure-Samples/AI-Gateway/tree/main/labs/message-storing",
+    "githubPath": "https://github.com/TonyWildish-BH/AI-Gateway/tree/main/labs/message-storing",
     "tags": [],
-    "lastCommitDate": "2026-06-23T13:28:02.184Z"
+    "lastCommitDate": "2026-09-11T18:11:23.414Z"
   },
   {
     "id": "model-context-protocol",
@@ -773,9 +773,9 @@
       "vieiraae",
       "nourshaker-msft"
     ],
-    "githubPath": "https://github.com/Azure-Samples/AI-Gateway/tree/main/labs/model-context-protocol",
+    "githubPath": "https://github.com/TonyWildish-BH/AI-Gateway/tree/main/labs/model-context-protocol",
     "tags": [],
-    "lastCommitDate": "2026-06-23T13:28:02.185Z"
+    "lastCommitDate": "2026-09-11T18:11:23.414Z"
   },
   {
     "id": "model-routing",
@@ -795,9 +795,9 @@
       "simonkurtz-MSFT",
       "nourshaker-msft"
     ],
-    "githubPath": "https://github.com/Azure-Samples/AI-Gateway/tree/main/labs/model-routing",
+    "githubPath": "https://github.com/TonyWildish-BH/AI-Gateway/tree/main/labs/model-routing",
     "tags": [],
-    "lastCommitDate": "2026-07-06T10:25:14.678Z"
+    "lastCommitDate": "2026-09-11T18:26:40.810Z"
   },
   {
     "id": "openai-agents",
@@ -815,9 +815,9 @@
     "authors": [
       "vieiraae"
     ],
-    "githubPath": "https://github.com/Azure-Samples/AI-Gateway/tree/main/labs/openai-agents",
+    "githubPath": "https://github.com/TonyWildish-BH/AI-Gateway/tree/main/labs/openai-agents",
     "tags": [],
-    "lastCommitDate": "2026-06-23T13:28:02.185Z"
+    "lastCommitDate": "2026-09-11T18:11:23.414Z"
   },
   {
     "id": "private-connectivity",
@@ -836,9 +836,9 @@
     "authors": [
       "HoussemDellai"
     ],
-    "githubPath": "https://github.com/Azure-Samples/AI-Gateway/tree/main/labs/private-connectivity",
+    "githubPath": "https://github.com/TonyWildish-BH/AI-Gateway/tree/main/labs/private-connectivity",
     "tags": [],
-    "lastCommitDate": "2026-02-19T12:42:08.761Z"
+    "lastCommitDate": "2026-09-11T18:11:23.414Z"
   },
   {
     "id": "realtime-audio",
@@ -857,9 +857,9 @@
     "authors": [
       "nourshaker-msft"
     ],
-    "githubPath": "https://github.com/Azure-Samples/AI-Gateway/tree/main/labs/realtime-audio",
+    "githubPath": "https://github.com/TonyWildish-BH/AI-Gateway/tree/main/labs/realtime-audio",
     "tags": [],
-    "lastCommitDate": "2026-06-23T13:28:02.185Z"
+    "lastCommitDate": "2026-09-11T18:11:23.414Z"
   },
   {
     "id": "realtime-mcp-agents",
@@ -882,9 +882,9 @@
       "nourshaker-msft",
       "vieiraae"
     ],
-    "githubPath": "https://github.com/Azure-Samples/AI-Gateway/tree/main/labs/realtime-mcp-agents",
+    "githubPath": "https://github.com/TonyWildish-BH/AI-Gateway/tree/main/labs/realtime-mcp-agents",
     "tags": [],
-    "lastCommitDate": "2026-06-23T13:28:02.186Z"
+    "lastCommitDate": "2026-09-11T18:11:23.414Z"
   },
   {
     "id": "secure-responses-api",
@@ -902,9 +902,9 @@
     "authors": [
       "anotherRedbeard"
     ],
-    "githubPath": "https://github.com/Azure-Samples/AI-Gateway/tree/main/labs/secure-responses-api",
+    "githubPath": "https://github.com/TonyWildish-BH/AI-Gateway/tree/main/labs/secure-responses-api",
     "tags": [],
-    "lastCommitDate": "2026-06-23T13:28:02.186Z"
+    "lastCommitDate": "2026-09-11T18:11:23.414Z"
   },
   {
     "id": "self-hosted-ollama",
@@ -924,8 +924,8 @@
       "loreaa"
     ],
     "tags": [],
-    "githubPath": "https://github.com/Azure-Samples/AI-Gateway/tree/main/labs/self-hosted-ollama",
-    "lastCommitDate": "2026-06-23T13:28:02.186Z"
+    "githubPath": "https://github.com/TonyWildish-BH/AI-Gateway/tree/main/labs/self-hosted-ollama",
+    "lastCommitDate": "2026-09-11T18:11:23.415Z"
   },
   {
     "id": "semantic-caching",
@@ -944,9 +944,9 @@
     "authors": [
       "vieiraae"
     ],
-    "githubPath": "https://github.com/Azure-Samples/AI-Gateway/tree/main/labs/semantic-caching",
+    "githubPath": "https://github.com/TonyWildish-BH/AI-Gateway/tree/main/labs/semantic-caching",
     "tags": [],
-    "lastCommitDate": "2026-06-23T13:28:02.186Z"
+    "lastCommitDate": "2026-09-11T18:11:23.415Z"
   },
   {
     "id": "serverless-gpu",
@@ -966,8 +966,8 @@
       "nourshaker-msft"
     ],
     "tags": [],
-    "githubPath": "https://github.com/Azure-Samples/AI-Gateway/tree/main/labs/serverless-gpu",
-    "lastCommitDate": "2026-06-23T13:28:02.187Z"
+    "githubPath": "https://github.com/TonyWildish-BH/AI-Gateway/tree/main/labs/serverless-gpu",
+    "lastCommitDate": "2026-09-11T18:11:23.415Z"
   },
   {
     "id": "session-awareness",
@@ -986,9 +986,9 @@
     "authors": [
       "dbarkol"
     ],
-    "githubPath": "https://github.com/Azure-Samples/AI-Gateway/tree/main/labs/session-awareness",
+    "githubPath": "https://github.com/TonyWildish-BH/AI-Gateway/tree/main/labs/session-awareness",
     "tags": [],
-    "lastCommitDate": "2026-06-23T13:28:02.187Z"
+    "lastCommitDate": "2026-09-11T18:11:23.415Z"
   },
   {
     "id": "slm-self-hosting",
@@ -1007,9 +1007,9 @@
     "authors": [
       "vieiraae"
     ],
-    "githubPath": "https://github.com/Azure-Samples/AI-Gateway/tree/main/labs/slm-self-hosting",
+    "githubPath": "https://github.com/TonyWildish-BH/AI-Gateway/tree/main/labs/slm-self-hosting",
     "tags": [],
-    "lastCommitDate": "2026-06-23T13:28:02.187Z"
+    "lastCommitDate": "2026-09-11T18:11:23.415Z"
   },
   {
     "id": "token-metrics-emitting",
@@ -1028,9 +1028,9 @@
     "authors": [
       "vieiraae"
     ],
-    "githubPath": "https://github.com/Azure-Samples/AI-Gateway/tree/main/labs/token-metrics-emitting",
+    "githubPath": "https://github.com/TonyWildish-BH/AI-Gateway/tree/main/labs/token-metrics-emitting",
     "tags": [],
-    "lastCommitDate": "2026-06-23T13:28:02.187Z"
+    "lastCommitDate": "2026-09-11T18:11:23.415Z"
   },
   {
     "id": "token-rate-limiting",
@@ -1048,9 +1048,9 @@
     "authors": [
       "vieiraae"
     ],
-    "githubPath": "https://github.com/Azure-Samples/AI-Gateway/tree/main/labs/token-rate-limiting",
+    "githubPath": "https://github.com/TonyWildish-BH/AI-Gateway/tree/main/labs/token-rate-limiting",
     "tags": [],
-    "lastCommitDate": "2026-06-23T13:28:02.188Z"
+    "lastCommitDate": "2026-09-11T18:11:23.415Z"
   },
   {
     "id": "vector-searching",
@@ -1088,8 +1088,8 @@
     "authors": [
       "simonkurtz-MSFT"
     ],
-    "githubPath": "https://github.com/Azure-Samples/AI-Gateway/tree/main/labs/zero-to-production",
+    "githubPath": "https://github.com/TonyWildish-BH/AI-Gateway/tree/main/labs/zero-to-production",
     "tags": [],
-    "lastCommitDate": "2026-02-23T15:05:59.378Z"
+    "lastCommitDate": "2026-09-11T18:11:23.415Z"
   }
 ]

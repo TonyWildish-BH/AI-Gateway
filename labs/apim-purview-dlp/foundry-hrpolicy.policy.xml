@@ -106,7 +106,7 @@
         }" />
         <set-variable name="content-direction"            value="Prompt" />
         <set-variable name="content-backend"              value="Foundry" />
-        <set-variable name="content-model"                value="gpt-4.1" />
+        <set-variable name="content-model"                value="{{foundry-model-name}}" />
         <set-variable name="content-correlation-id"       value="@((string)context.Variables["pv-correlation-id"])" />
         <set-variable name="content-text"                 value="@((string)context.Variables.GetValueOrDefault<string>("pv-text", ""))" />
         <set-variable name="content-purview-blocked"      value="@((string)context.Variables.GetValueOrDefault<string>("pv-blocked", "0") == "1" ? "true" : "false")" />
@@ -198,7 +198,7 @@
         <!-- ── 4a. Content log: response text + Gate 3 verdict + tokens ─ -->
         <set-variable name="content-direction"            value="Response" />
         <set-variable name="content-backend"              value="Foundry" />
-        <set-variable name="content-model"                value="gpt-4.1" />
+        <set-variable name="content-model"                value="{{foundry-model-name}}" />
         <set-variable name="content-text"                 value="@((string)context.Variables.GetValueOrDefault<string>("pv-text", ""))" />
         <set-variable name="content-purview-blocked"      value="@((string)context.Variables.GetValueOrDefault<string>("pv-blocked", "0") == "1" ? "true" : "false")" />
         <set-variable name="content-purview-block-reason" value="@((string)context.Variables.GetValueOrDefault<string>("pv-block-reason", "none"))" />
@@ -255,7 +255,7 @@
             <message>AIGateway/Foundry request</message>
             <metadata name="User"                 value="@((string)context.Variables.GetValueOrDefault<string>("content-user", "anonymous"))" />
             <metadata name="Backend"              value="Foundry" />
-            <metadata name="Model"                value="gpt-4.1" />
+            <metadata name="Model"                value="{{foundry-model-name}}" />
             <metadata name="InputTokens"          value="@(context.Response.Headers.GetValueOrDefault("X-Model-Input-Tokens", "0"))" />
             <metadata name="OutputTokens"         value="@(context.Response.Headers.GetValueOrDefault("X-Model-Output-Tokens", "0"))" />
             <metadata name="PurviewPromptCalls"   value="@((string)context.Variables.GetValueOrDefault<string>("pv-prompt-called", "0"))" />

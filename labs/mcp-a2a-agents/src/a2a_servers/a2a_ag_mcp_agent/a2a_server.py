@@ -23,7 +23,7 @@ MCP_URL                 = os.environ.get("MCP_URL", "")
 APIM_GATEWAY_URL        = os.environ.get("APIM_GATEWAY_URL", "")
 APIM_SUBSCRIPTION_KEY   = os.environ.get("APIM_SUBSCRIPTION_KEY", "")  # secret!
 OPENAI_API_VERSION      = os.environ.get("OPENAI_API_VERSION", "2024-11-01-preview")
-OPENAI_DEPLOYMENT_NAME  = os.environ.get("OPENAI_DEPLOYMENT_NAME", "gpt-4.1-mini")
+OPENAI_DEPLOYMENT_NAME  = os.environ.get("OPENAI_DEPLOYMENT_NAME", "gpt-5-mini")  # model-catalog-allow: container entrypoint baked into the image, shared/utils.py is not available at runtime; the real value arrives as the OPENAI_DEPLOYMENT_NAME env var set by the catalogue-driven notebook
 ACA_URL                 = f"https://{os.environ.get('CONTAINER_APP_NAME', '')}.{os.environ.get('CONTAINER_APP_ENV_DNS_SUFFIX', '')}"
 A2A_URL                 = os.environ.get("A2A_URL", ACA_URL)
 

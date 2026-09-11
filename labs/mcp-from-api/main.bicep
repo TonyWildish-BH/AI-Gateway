@@ -9,7 +9,7 @@ param apimSubscriptionsConfig array = []
 param inferenceAPIType string = 'AzureOpenAI'
 param inferenceAPIPath string = 'inference' // Path to the inference API in the APIM service
 param foundryProjectName string = 'default'
-param apicLocation string = resourceGroup().location
+param apicLocation string = 'swedencentral'
 param apicServiceNamePrefix string = 'apic' // API Center does not currently support instance purge, so we use a prefix to ensure uniqueness
 
 // ------------------

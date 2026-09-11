@@ -1,3 +1,17 @@
+# Central model catalogue - single source of truth for model identity.
+# Change a model in shared/models.json and every lab follows.
+locals {
+  model_catalog = jsondecode(file("${path.module}/../../shared/models.json"))
+  model         = local.model_catalog.foundry["chat-small-4o"]
+
+  # The var.* values stay as an escape hatch; empty means "use the catalogue".
+  model_name            = coalesce(var.model_name, local.model.name)
+  model_version         = coalesce(var.model_version, local.model.version)
+  model_deployment_name = coalesce(var.model_deployment_name, local.model.name)
+  model_format          = local.model.publisher
+  model_sku             = local.model.sku
+}
+
 resource "random_string" "random" {
   length  = 8
   lower   = true
@@ -53,21 +67,23 @@ resource "azapi_resource" "ai-project" {
   }
 }
 
-resource "azurerm_cognitive_deployment" "gpt-4o" {
+resource "azurerm_cognitive_deployment" "gpt-4o" { // model-catalog-allow: Terraform resource label, not a model reference - the deployed model resolves from shared/models.json via local.model below. Renaming the label changes the state address and would force a destroy/recreate.
   for_each = var.aiservices_config
 
-  name                 = var.model_deployment_name
+  name                 = local.model_deployment_name
   cognitive_account_id = azapi_resource.ai-services[each.key].id
 
   sku {
-    name     = "GlobalStandard" # "GlobalStandard" # "Standard" # DataZoneStandard, GlobalBatch, GlobalStandard and ProvisionedManaged
+    # Catalogue SKU: GlobalStandard. Other valid values: Standard, DataZoneStandard,
+    # GlobalBatch, ProvisionedManaged.
+    name     = local.model_sku
     capacity = var.model_capacity
   }
 
   model {
-    format  = "OpenAI"
-    name    = var.model_name
-    version = var.model_version
+    format  = local.model_format
+    name    = local.model_name
+    version = local.model_version
   }
 }
 

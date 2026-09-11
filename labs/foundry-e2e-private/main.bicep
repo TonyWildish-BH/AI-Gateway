@@ -20,7 +20,7 @@
 // Core parameters
 // ---------------------------------------------------------------------------
 @description('Primary Azure region for all resources.')
-param location string = resourceGroup().location
+param location string = 'swedencentral'
 
 @description('Azure region for the cross-region OpenAI resource (when deployCrossRegionOpenAI is true).')
 param locationCrossRegion string = 'swedencentral'
@@ -31,18 +31,23 @@ param aiServicesName string = 'aiservices'
 @description('Base name for the Foundry project (will be suffixed with a unique string).')
 param foundryProjectName string = 'project'
 
+// Model defaults resolve from the central catalogue (shared/models.json), role
+// 'chat-small-4o'. loadJsonContent() is evaluated at compile time, so it is legal
+// inside a parameter default value. Going via a `var` is NOT: Bicep rejects it with
+// BCP072 ("Only other parameters can be referenced in parameter default values").
 @description('The provider of your model.')
-param modelFormat string = 'OpenAI'
+param modelFormat string = loadJsonContent('../../shared/models.json', '$.foundry.chat-small-4o.publisher')
 
 @description('Model name to deploy on the primary Foundry account.')
-param modelName string = 'gpt-4o-mini'
+param modelName string = loadJsonContent('../../shared/models.json', '$.foundry.chat-small-4o.name')
 
 @description('Model version.')
-param modelVersion string = '2024-07-18'
+param modelVersion string = loadJsonContent('../../shared/models.json', '$.foundry.chat-small-4o.version')
 
 @description('Model SKU (e.g. GlobalStandard, Standard).')
-param modelSkuName string = 'GlobalStandard'
+param modelSkuName string = loadJsonContent('../../shared/models.json', '$.foundry.chat-small-4o.sku')
 
+// Capacity is lab-owned, not a catalogue property.
 @description('Tokens-per-minute capacity for the model deployment.')
 param modelCapacity int = 30
 
@@ -109,10 +114,10 @@ param inferenceApiVersion string = '2024-10-21'
 param deployCrossRegionOpenAI bool = true
 
 @description('Model name to deploy in the cross-region OpenAI account.')
-param crossRegionModelName string = 'gpt-4o'
+param crossRegionModelName string = loadJsonContent('../../shared/models.json', '$.foundry.chat-4o.name')
 
 @description('Model version for the cross-region deployment.')
-param crossRegionModelVersion string = '2024-11-20'
+param crossRegionModelVersion string = loadJsonContent('../../shared/models.json', '$.foundry.chat-4o.version')
 
 @description('Name for the cross-region APIM gateway connection on the Foundry project.')
 param apimCrossRegionConnectionName string = 'apim-gateway-crossregion'

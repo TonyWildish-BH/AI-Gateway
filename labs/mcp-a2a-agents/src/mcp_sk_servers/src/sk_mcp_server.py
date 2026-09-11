@@ -11,7 +11,7 @@ apim_resource_gateway_url        = os.environ.get("APIM_GATEWAY_URL", "")
 apim_subscription_key   = os.environ.get("APIM_SUBSCRIPTION_KEY", "")  # secret!
 inference_api_version      = os.environ.get("OPENAI_API_VERSION", "2025-03-01-preview")
 inference_api_path = os.environ.get("INFERENCE_API_PATH", "")
-openai_model_name  = os.environ.get("OPENAI_DEPLOYMENT_NAME", "gpt-4o-mini")
+openai_model_name  = os.environ.get("OPENAI_DEPLOYMENT_NAME", "gpt-5-mini")  # model-catalog-allow: container entrypoint baked into the image, shared/utils.py is not available at runtime; the real value arrives as the OPENAI_DEPLOYMENT_NAME env var set by the catalogue-driven notebook
 
 ### TODO: Integrate in Server lifecycle - current life cycle creates 1 persistent SK Agent, no threads, no fallback
 async def _safe_disconnect(plugin: MCPStreamableHttpPlugin) -> None:

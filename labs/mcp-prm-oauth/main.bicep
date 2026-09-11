@@ -30,7 +30,7 @@ param mcpClientId string = ''
 @description('Tags to apply to all resources')
 param tags object = {}
 
-param location string = resourceGroup().location
+param location string = 'swedencentral'
 
 param mcpApiPath string = 'mcp'
 

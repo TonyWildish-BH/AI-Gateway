@@ -97,7 +97,11 @@ def build_agent() -> Agent:
     global _AGENT
     if _AGENT is None:
         endpoint = os.environ["AZURE_OPENAI_ENDPOINT"]
-        deployment = os.environ.get("AZURE_OPENAI_DEPLOYMENT", "gpt-5-mini")
+        # model-catalog-allow: container entrypoint baked into the agent image (Dockerfile COPY . ),
+        # so shared/utils.py is not on disk at runtime. The real value is supplied as the
+        # AZURE_OPENAI_DEPLOYMENT env var by ai-foundry-hosted-agents-custom-framework.ipynb,
+        # which resolves it from shared/models.json. This literal is only the offline fallback.
+        deployment = os.environ.get("AZURE_OPENAI_DEPLOYMENT", "gpt-5-mini")  # model-catalog-allow: see above - env var supplied by the catalogue-driven notebook
         api_key = (
             os.environ.get("AZURE_OPENAI_API_KEY")
             or os.environ.get("OPENAI_API_KEY")
