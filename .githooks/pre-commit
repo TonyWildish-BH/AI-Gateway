@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+#
+# Reject notebooks staged with stored cell outputs.
+#
+# Lab notebooks print the current tenant ID, subscription ID and user principal
+# name by design (see the `az account show` cell near the top of most labs), and
+# `az` echoes full resource IDs. Committing outputs publishes all of it. Once a
+# commit reaches a public fork it is effectively unrecoverable: fork-network
+# members share an object store, so rewriting history removes the refs but not
+# the objects, and only a GitHub Support purge clears them.
+#
+# Install: git config core.hooksPath .githooks
+
+set -euo pipefail
+
+PYTHON="${PYTHON:-python3}"
+command -v "$PYTHON" >/dev/null 2>&1 || PYTHON=python
+
+exec "$PYTHON" "$(git rev-parse --show-toplevel)/.github/workflows/nbchecks.py" --staged
