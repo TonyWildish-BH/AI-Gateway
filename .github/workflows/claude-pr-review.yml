@@ -1,0 +1,149 @@
+name: Claude PR Review (Tracked)
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write      # needed to read/edit comments on issue_comment trigger
+  id-token: write    # required for Azure OIDC federation
+
+jobs:
+  # Evaluate both trigger types and decide whether to proceed.
+  # Outputs are consumed by the review job below.
+  check-trigger:
+    runs-on: ubuntu-latest
+    outputs:
+      should-run:      ${{ steps.check.outputs.should-run }}
+      trigger-type:    ${{ steps.check.outputs.trigger-type }}
+      pr-number:       ${{ steps.check.outputs.pr-number }}
+      pr-head-sha:     ${{ steps.check.outputs.pr-head-sha }}
+      pr-base-ref:     ${{ steps.check.outputs.pr-base-ref }}
+      pr-author:       ${{ steps.check.outputs.pr-author }}
+      wontfix-comment: ${{ steps.check.outputs.wontfix-comment }}
+
+    steps:
+      - id: check
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Isolate all user-controlled fields as env vars to prevent injection.
+          COMMENT_BODY:    ${{ github.event.comment.body }}
+          COMMENT_AUTHOR:  ${{ github.event.comment.user.login }}
+          PR_IS_DRAFT:     ${{ github.event.pull_request.draft }}
+          PR_SAME_REPO:    ${{ github.event.pull_request.head.repo.full_name == github.repository }}
+          PR_NUMBER_PUSH:  ${{ github.event.pull_request.number }}
+          PR_HEAD_SHA_PUSH: ${{ github.event.pull_request.head.sha }}
+          PR_BASE_REF:     ${{ github.event.pull_request.base.ref }}
+          PR_AUTHOR_PUSH:  ${{ github.event.pull_request.user.login }}
+          ISSUE_NUMBER:    ${{ github.event.issue.number }}
+          IS_PR_COMMENT:   ${{ github.event.issue.pull_request != null }}
+        run: |
+          EVENT="${{ github.event_name }}"
+
+          if [ "$EVENT" = "pull_request" ]; then
+            if [ "$PR_IS_DRAFT" = "true" ] || [ "$PR_SAME_REPO" = "false" ]; then
+              echo "should-run=false" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+
+            echo "should-run=true"                    >> "$GITHUB_OUTPUT"
+            echo "trigger-type=push"                  >> "$GITHUB_OUTPUT"
+            echo "pr-number=${PR_NUMBER_PUSH}"        >> "$GITHUB_OUTPUT"
+            echo "pr-head-sha=${PR_HEAD_SHA_PUSH}"    >> "$GITHUB_OUTPUT"
+            echo "pr-base-ref=${PR_BASE_REF}"         >> "$GITHUB_OUTPUT"
+            echo "pr-author=${PR_AUTHOR_PUSH}"        >> "$GITHUB_OUTPUT"
+            echo "wontfix-comment="                   >> "$GITHUB_OUTPUT"
+
+          elif [ "$EVENT" = "issue_comment" ]; then
+            # Only act if comment is on a PR and body starts with /wontfix #N.
+            if [ "$IS_PR_COMMENT" = "false" ] || \
+               ! echo "$COMMENT_BODY" | grep -qE '^/wontfix #[0-9]+'; then
+              echo "should-run=false" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+
+            PR_HEAD_SHA=$(gh api "repos/${{ github.repository }}/pulls/${ISSUE_NUMBER}" --jq '.head.sha')
+
+            echo "should-run=true"                    >> "$GITHUB_OUTPUT"
+            echo "trigger-type=wontfix"               >> "$GITHUB_OUTPUT"
+            echo "pr-number=${ISSUE_NUMBER}"          >> "$GITHUB_OUTPUT"
+            echo "pr-head-sha=${PR_HEAD_SHA}"         >> "$GITHUB_OUTPUT"
+            echo "pr-base-ref="                       >> "$GITHUB_OUTPUT"
+            echo "pr-author=${COMMENT_AUTHOR}"        >> "$GITHUB_OUTPUT"
+
+            # Multi-line safe output for the comment body.
+            DELIM=$(dd if=/dev/urandom bs=15 count=1 2>/dev/null | base64)
+            echo "wontfix-comment<<${DELIM}"          >> "$GITHUB_OUTPUT"
+            echo "$COMMENT_BODY"                      >> "$GITHUB_OUTPUT"
+            echo "${DELIM}"                           >> "$GITHUB_OUTPUT"
+          fi
+
+  review:
+    needs: check-trigger
+    if: needs.check-trigger.outputs.should-run == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    env:
+      # Claude Code authenticates via Azure Foundry (ChainedTokenCredential /
+      # AzureCliCredential). The azure/login step below makes this work.
+      CLAUDE_CODE_USE_FOUNDRY: 1
+      ANTHROPIC_FOUNDRY_BASE_URL: ${{ secrets.AZURE_FOUNDRY_ENDPOINT }}
+      ANTHROPIC_DEFAULT_SONNET_MODEL: claude-sonnet-4-6
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # Passed to the tracked-review skill so it doesn't need to shell out
+      # for these values.
+      PR_NUMBER:       ${{ needs.check-trigger.outputs.pr-number }}
+      PR_AUTHOR:       ${{ needs.check-trigger.outputs.pr-author }}
+      TRIGGER_TYPE:    ${{ needs.check-trigger.outputs.trigger-type }}
+      WONTFIX_COMMENT: ${{ needs.check-trigger.outputs.wontfix-comment }}
+      COMMIT_SHA:      ${{ needs.check-trigger.outputs.pr-head-sha }}
+
+    steps:
+      - name: Azure login (OIDC — claude-pr-bot App Registration)
+        uses: azure/login@v2
+        with:
+          client-id:       ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id:       ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Checkout PR head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.check-trigger.outputs.pr-head-sha }}
+          fetch-depth: 0
+
+      - name: Fetch base branch (push trigger only)
+        if: needs.check-trigger.outputs.trigger-type == 'push'
+        run: |
+          git fetch origin "${{ needs.check-trigger.outputs.pr-base-ref }}:${{ needs.check-trigger.outputs.pr-base-ref }}"
+
+      - name: Install Claude Code
+        run: curl -fsSL https://claude.ai/install.sh | bash
+
+      - name: Run tracked review
+        # --dangerously-skip-permissions required: the skill uses Bash (git, gh),
+        # Read, Write, and Agent tools in headless CI. Trust boundary: the
+        # check-trigger job above rejects draft PRs and fork PRs, so only
+        # same-repo content reaches this step.
+        run: |
+          set +e
+          claude --print --dangerously-skip-permissions \
+            "/tracked-review" > review-output.md 2> review-stderr.log
+          CLAUDE_EXIT=$?
+          set -e
+
+          if [ "$CLAUDE_EXIT" -ne 0 ]; then
+            echo "::group::stdout ($(wc -c < review-output.md) bytes)"
+            cat review-output.md || true
+            echo "::endgroup::"
+            echo "::group::stderr ($(wc -c < review-stderr.log) bytes)"
+            cat review-stderr.log || true
+            echo "::endgroup::"
+            echo "::error::claude CLI exited with code $CLAUDE_EXIT"
+            exit 1
+          fi
