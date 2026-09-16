@@ -1,7 +1,6 @@
 ---
 name: tracked-review
 description: Stateful PR review that assigns unique IDs to findings and tracks them to closure across runs. Handles both commit-push reviews and /wontfix comment processing. Invoked by the claude-pr-review.yml workflow.
-allowed-tools: ["Bash", "Read", "Write", "Agent"]
 ---
 
 # Tracked PR Review

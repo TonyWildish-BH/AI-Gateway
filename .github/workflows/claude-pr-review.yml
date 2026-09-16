@@ -133,17 +133,26 @@ jobs:
         run: |
           set +e
           claude --print --dangerously-skip-permissions \
+            --allowed-tools "Bash Read Write Agent" \
             "/tracked-review" > review-output.md 2> review-stderr.log
           CLAUDE_EXIT=$?
           set -e
 
-          if [ "$CLAUDE_EXIT" -ne 0 ]; then
-            echo "::group::stdout ($(wc -c < review-output.md) bytes)"
+          # Always surface output to job summary for visibility.
+          {
+            echo "## Claude review output (exit $CLAUDE_EXIT)"
+            echo '```'
             cat review-output.md || true
-            echo "::endgroup::"
-            echo "::group::stderr ($(wc -c < review-stderr.log) bytes)"
-            cat review-stderr.log || true
-            echo "::endgroup::"
+            echo '```'
+            if [ -s review-stderr.log ]; then
+              echo "### stderr"
+              echo '```'
+              cat review-stderr.log || true
+              echo '```'
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          if [ "$CLAUDE_EXIT" -ne 0 ]; then
             echo "::error::claude CLI exited with code $CLAUDE_EXIT"
             exit 1
           fi
