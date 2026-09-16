@@ -111,6 +111,13 @@ jobs:
           tenant-id:       ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
+      - name: Debug auth
+        run: |
+          az account show
+          az account get-access-token --resource https://ai.azure.com --query "tokenType" -o tsv \
+            && echo "Foundry token: OK" || echo "Foundry token: FAILED"
+          echo "FOUNDRY_BASE_URL length: ${#ANTHROPIC_FOUNDRY_BASE_URL}"
+
       - name: Checkout PR head
         uses: actions/checkout@v4
         with:
