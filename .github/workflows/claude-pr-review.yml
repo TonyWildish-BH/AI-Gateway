@@ -133,7 +133,6 @@ jobs:
         run: |
           set +e
           claude --print --dangerously-skip-permissions \
-            --allowed-tools "Bash Read Write Agent" \
             "/tracked-review" > review-output.md 2> review-stderr.log
           CLAUDE_EXIT=$?
           set -e
