@@ -137,8 +137,6 @@ jobs:
         # same-repo content reaches this step.
         run: |
           set +e
-          claude --version
-          claude --model sonnet -p "Say 'ping'"
           claude --print --dangerously-skip-permissions \
             "/tracked-review" > review-output.md 2> review-stderr.log
           CLAUDE_EXIT=$?
