@@ -294,6 +294,9 @@ W=Warning(quality/risk), I=Informational(suggestion/style).
 fixable=true only when: single contiguous block in one file, no behavioural risk,
 pure refactor/syntax/typo/obvious guard. Include the patch as a unified diff.
 
+fixable=false always when: file is in `.github/workflows/` — GITHUB_TOKEN cannot
+push workflow file changes (blocked server-side); offering auto-fix would always fail.
+
 Return {"findings": []} if no new issues. Return ONLY the JSON object.
 ```
 
