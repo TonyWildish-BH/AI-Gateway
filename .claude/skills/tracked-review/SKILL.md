@@ -104,19 +104,19 @@ Schema:
 ```markdown
 ## PR Review Tracker
 
-| ID | Status | Severity | Summary | Location | Raised |
-|----|--------|----------|---------|----------|--------|
-| /C1 | ✅ fixed | Critical | Short summary | `file.py:42` | `abc1234` |
-| /I2 | 🚫 won't fix | Informational | Short summary | `file.py` | `def5678` — @user: "reason" |
-| /S3 | 🎫 ticketed | Severe | Short summary | `file.py:10` | `def5678` — [#42](url) |
-| /W4 | 🔴 open | Warning | Short summary | `file.py:167` | `ghi9012` 💡 |
+| ID | Status | Severity | Summary | Location | Open |
+|----|--------|----------|---------|----------|------|
+| /C1 | ✅ fixed | Critical | Short summary | `file.py:42` | No |
+| /S3 | 🎫 ticketed | Severe | Short summary | `file.py:10` | Yes |
+| /W4 | 🔴 open | Warning | Short summary | `file.py:167` | Yes 💡 |
+| /I2 | 🚫 won't fix | Informational | Short summary | `file.py` | No |
 
 <!-- review-state
 { ... JSON state ... }
 -->
 ```
 
-Rows sorted by ID ascending. The 💡 on an open row means a safe auto-fix is available.
+Rows sorted by severity (C → S → W → I), then by ID ascending within each severity. The 💡 on an open row means a safe auto-fix is available. Open column: "Yes" if status is open or ticketed, "No" if fixed or won't-fix.
 Status emojis: open=🔴, fixed=✅, won't fix=🚫, ticketed=🎫.
 
 ---
@@ -137,10 +137,14 @@ Status emojis: open=🔴, fixed=✅, won't fix=🚫, ticketed=🎫.
 | 🆕 New findings | /W6 /I7 |
 | 💡 Safe auto-fix available | /fix /W4 /W6 |
 
+**New findings:**
+- `/W6` — Short summary of finding (`file.py:42`)
+- `/I7` — Short summary of finding (`other.py:10`)
+
 See the [tracking comment](#) for full details.
 ```
 
-Omit rows with zero items. Omit the 💡 row if no fixable items.
+Omit the "New findings" table row and bullet list if no new findings this run. Omit rows with zero items. Omit the 💡 row if no fixable items.
 If all items fixed and no new findings: "No open issues — PR is clear."
 
 ---
@@ -427,15 +431,18 @@ git commit -m "Apply tracked-review auto-fixes: {id list}"
 git push
 ```
 
-### Step 5 — Post result comment
+### Step 5 — Update state and tracking comment
+
+For each applied fix: move item from `open` → `closed` (record new `COMMIT_SHA[0:7]` as `at`).
+Rebuild and patch tracking comment with updated table and JSON state.
+
+### Step 6 — Post result comment
 
 ```bash
-gh pr comment "$PR_NUMBER" --body "Applied fixes: {applied list}. Skipped: {skipped list}. Commit: \`{sha}\`. Running fresh review..."
+gh pr comment "$PR_NUMBER" --body "Applied fixes: {applied list}. Skipped: {skipped list}. Commit: \`{sha}\`."
 ```
 
-### Step 6 — Run PUSH flow immediately
-
-Execute the full PUSH TRIGGER FLOW against the new commit to re-verify all open items and find any new issues.
+Do NOT re-run the full review. The tracking comment is already up to date.
 
 ---
 
