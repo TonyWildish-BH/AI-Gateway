@@ -1,6 +1,7 @@
 ---
 name: tracked-review
 description: Stateful PR review with severity-classified findings, specialist agents, /wontfix, /ticket, and /fix commands. Invoked by the claude-pr-review.yml workflow.
+allowed-tools: Agent, Bash, Read, Edit
 ---
 
 # Tracked PR Review
@@ -13,6 +14,8 @@ Read the `TRIGGER_TYPE` environment variable and branch accordingly.
 - `fix` → apply safe auto-fixes
 
 All env vars set by the workflow: `PR_NUMBER`, `PR_AUTHOR`, `TRIGGER_TYPE`, `WONTFIX_COMMENT`, `COMMIT_SHA`, `GITHUB_REPOSITORY`, `PR_BASE_REF`.
+
+`COMMIT_SHA` semantics by trigger: for `push` events it is the pushed commit SHA. For comment-triggered flows (`wontfix`, `ticket`, `fix`) it is the PR's current head SHA at the time the comment was posted. `PR_AUTHOR` for comment-triggered flows is the commenter's login (set by the workflow's check-trigger job), not necessarily the original PR author.
 
 ---
 
@@ -137,7 +140,7 @@ Status emojis: 🔴 open, ✅ fixed, 🚫 won't fix, 🎫 ticketed.
 | 🚫 Won't fix auto-closed (now fixed) | /I2 |
 | 🔴 Still open | /W4 /W5 |
 | 🆕 New findings | /W6 /I7 |
-| 💡 Safe auto-fix available | /fix /W4 /W6 /I8 |
+| 💡 Safe auto-fix available | /W4 /W6 /I8 |
 
 **New findings:**
 
@@ -146,10 +149,16 @@ Status emojis: 🔴 open, ✅ fixed, 🚫 won't fix, 🎫 ticketed.
 | /W6 | Warning | Short summary of finding | `file.py:42` |
 | /I7 | Informational | Short summary of finding | `other.py:10` |
 
-See the [tracking comment](#) for full details.
+See the [tracking comment](https://github.com/{GITHUB_REPOSITORY}/pull/{PR_NUMBER}#issuecomment-{tracking_comment_id}) for full details.
 ```
 
-Omit the "New findings" table row and bullet list if no new findings this run. Omit rows with zero items. The 💡 row lists ALL open fixable items across the entire state (not just new ones this run) — omit only if none exist.
+Omit the "New findings" table and its header if no new findings this run. Omit rows with zero items. The 💡 row lists ALL open fixable items across the entire state (not just new ones this run) — omit only if none exist.
+
+`last_run_open` is the set of open finding IDs from the end of the previous run. Use it to drive the update comment buckets:
+- In `last_run_open` and still open → "Still open"
+- In `last_run_open` but no longer open → "Fixed since last run"
+- Not in `last_run_open` → "New findings"
+
 If all items fixed and no new findings: "No open issues — PR is clear."
 
 ---
@@ -191,14 +200,17 @@ OR
 
 Items where `still_present == false` → newly closed.
 
-### Step 3 — Re-verify wontfix items (silent)
+### Step 3 — Re-verify wontfix and ticketed items (silent)
 
-Same prompt for each `state.wontfix` item.
+Use the same verify prompt for each item in `state.wontfix` AND `state.ticketed`.
+
+For `wontfix` items:
 - Still present → no change.
 - Now fixed → move to `closed`, note in update comment as "won't fix auto-closed (now fixed)".
 
-Skip `state.ticketed` items — tracked externally, not re-verified in this PR.
-If a ticketed item is now fixed anyway, note it in the update comment as "fixed before ticket resolved" and move to `closed`.
+For `ticketed` items:
+- Still present → no change.
+- Now fixed → move to `closed`, note in update comment as "fixed before ticket resolved".
 
 ### Step 4 — Fresh-findings pass (parallel specialist agents)
 
@@ -206,14 +218,25 @@ Spawn all applicable agents simultaneously in a single parallel batch — do not
 
 Determine changed files:
 ```bash
-git diff --name-only origin/$PR_BASE_REF...HEAD 2>/dev/null || \
-  git diff --name-only HEAD~1...HEAD
+CHANGED_FILES=$(git diff --name-only origin/$PR_BASE_REF...HEAD 2>/dev/null || \
+  git diff --name-only HEAD~1...HEAD 2>/dev/null)
+if [ -z "$CHANGED_FILES" ]; then
+  echo "::error::Could not determine changed files — aborting fresh-findings pass"
+  exit 1
+fi
 ```
 
 Get the diff:
 ```bash
-git diff origin/$PR_BASE_REF...HEAD 2>/dev/null || git diff HEAD~1...HEAD
+DIFF=$(git diff origin/$PR_BASE_REF...HEAD 2>/dev/null || \
+  git diff HEAD~1...HEAD 2>/dev/null)
+if [ -z "$DIFF" ]; then
+  echo "No diff detected — skipping fresh-findings pass."
+  # Skip agent spawning; proceed to Step 5 with no new findings.
+fi
 ```
+
+Build the known-findings list from `state.open + state.wontfix + state.ticketed` (format: `/{severity}{id}: {summary}` per line). Pass this list to each agent.
 
 **Always spawn:**
 - **code-reviewer** — correctness, bugs, CLAUDE.md rule compliance (SQL safety, breaking changes, binary files, destructive utilities, silent data corruption, config validation, argument conflicts, DataFrame mutation, display column whitelists)
@@ -228,12 +251,18 @@ git diff origin/$PR_BASE_REF...HEAD 2>/dev/null || git diff HEAD~1...HEAD
 **Spawn if new types/classes/interfaces added:**
 - **type-design-analyzer** — invariant expression, encapsulation, enforcement
 
+**Spawn after the above agents complete** (operates on fixable candidates from their output):
+- **code-simplifier** — polish/refine auto-fix patches; may update `patch` field for cleaner diffs
+
 Agent prompt template:
 ```
 You are reviewing a pull request for NEW issues only. Prior findings are tracked separately —
 do not repeat issues already known from before this commit.
 
 Your role: {agent-role}
+
+Known findings (do not re-report):
+{known_findings_list}
 
 Changed files: {file list}
 Diff:
@@ -274,7 +303,7 @@ Deduplicate across agents: same file + line + topic = one finding (keep highest 
 5. Append to `open`.
 6. Update `last_run_open` to current `open` IDs.
 7. Increment `next_id` by count of new findings.
-8. Increment `run_count` by 1.
+8. Increment `run_count` by 1 (treat as 0 if absent from existing state).
 
 ### Step 6 — Edit or create tracking comment
 
@@ -289,12 +318,14 @@ gh api "repos/$GITHUB_REPOSITORY/issues/comments/$TRACKING_ID" \
 If null (first run), create and capture ID:
 ```bash
 TRACKING_ID=$(gh api "repos/$GITHUB_REPOSITORY/issues/$PR_NUMBER/comments" \
-  -f body="$TRACKING_BODY" --jq '.id')
+  -f body="$TRACKING_BODY" --jq '.id') \
+  || { echo "::error::Failed to create tracking comment"; exit 1; }
 ```
 
 ### Step 7 — Post update comment
 
-Build and post update comment (see format above):
+Build update comment using `tracking_comment_id` from state to construct the issuecomment anchor URL. Post:
+
 ```bash
 gh pr comment "$PR_NUMBER" --body "$UPDATE_BODY"
 ```
@@ -333,9 +364,11 @@ gh pr comment "$PR_NUMBER" --body "Item /X{N} is not an open finding."
 
 Move from `open` → `wontfix`:
 ```json
-{"id": N, "severity": "X", "summary": "...", "reason": "...", "by": "PR_AUTHOR", "at": "COMMIT_SHA[0:7]"}
+{"id": N, "severity": "X", "summary": "...", "reason": "...", "by": "<PR_AUTHOR env var>", "at": "COMMIT_SHA[0:7]"}
 ```
 Remove N from `last_run_open`.
+
+(`PR_AUTHOR` env var holds the commenter's login for comment-triggered flows.)
 
 ### Step 5 — Edit tracking comment and post acknowledgement
 
@@ -363,6 +396,12 @@ ID must be in `state.open`. If not, post error and stop.
 
 ### Step 3 — File GitHub issue
 
+Create the `tracked-review` label first (idempotent):
+```bash
+gh label create "tracked-review" --color "0075ca" --description "Filed by tracked-review bot" 2>/dev/null || true
+```
+
+Then create the issue with that label:
 ```bash
 ISSUE_URL=$(gh issue create \
   --title "{summary}" \
@@ -376,24 +415,17 @@ ISSUE_URL=$(gh issue create \
 
 Filed via tracked-review from [PR #{PR_NUMBER}](https://github.com/{GITHUB_REPOSITORY}/pull/{PR_NUMBER})." \
   --label "tracked-review" \
-  --jq '.url' 2>/dev/null || \
-  gh issue create \
-  --title "{summary}" \
-  --body "..." \
   --jq '.url')
-```
-
-Create the `tracked-review` label if it doesn't exist:
-```bash
-gh label create "tracked-review" --color "0075ca" --description "Filed by tracked-review bot" 2>/dev/null || true
+[ -n "$ISSUE_URL" ] || { gh pr comment "$PR_NUMBER" --body "Failed to create issue for /X{N} — check gh permissions."; exit 1; }
 ```
 
 ### Step 4 — Update state
 
 Move from `open` → `ticketed`:
 ```json
-{"id": N, "severity": "X", "summary": "...", "issue_url": "...", "by": "PR_AUTHOR", "at": "COMMIT_SHA[0:7]"}
+{"id": N, "severity": "X", "summary": "...", "issue_url": "...", "by": "<PR_AUTHOR env var>", "at": "COMMIT_SHA[0:7]"}
 ```
+Remove N from `last_run_open`.
 
 ### Step 5 — Edit tracking comment and post acknowledgement
 
@@ -419,35 +451,66 @@ If malformed, post usage and stop.
 
 ### Step 3 — Validate and apply
 
-For each requested ID in order:
-1. Verify ID is in `state.open`.
-2. Verify `fixable == true` on that item.
-3. Re-verify the item is still present (spawn Agent with verify prompt from Step 2 of PUSH flow).
-   - If `still_present == false`: skip, note "already fixed".
-   - If malformed response: skip, note "could not verify — skipping".
-4. Apply the stored patch via Edit tool.
-5. Record as applied.
+Initialize tracking lists: `patched_files=[]`, `applied=[]`, `skipped_already_fixed=[]`, `skipped_unverifiable=[]`, `skipped_not_eligible=[]`, `skipped_apply_failed=[]`.
 
-If any ID is not fixable or not found, post an error for that ID but continue with the others.
+For each requested ID in order:
+1. If ID not in `state.open` or `fixable != true` → add to `skipped_not_eligible`, continue.
+2. Re-verify the item is still present (spawn Agent with verify prompt from Step 2 of PUSH flow).
+   - If `still_present == false`: add to `skipped_already_fixed`, continue.
+   - If malformed response: add to `skipped_unverifiable`, continue.
+3. Apply the stored patch via Edit tool. If patch fails to apply: add to `skipped_apply_failed`, continue.
+4. Record the patched file path in `patched_files`. Add ID to `applied`.
 
 ### Step 4 — Commit and push
 
+If `applied` is empty, post a differentiated outcome comment and stop:
 ```bash
+gh pr comment "$PR_NUMBER" --body "No patches applied.
+$([ -n "{skipped_already_fixed}" ] && echo "Already fixed: {skipped_already_fixed}.")
+$([ -n "{skipped_not_eligible}" ] && echo "Not eligible (not open or not fixable): {skipped_not_eligible}.")
+$([ -n "{skipped_unverifiable}" ] && echo "Could not verify: {skipped_unverifiable}.")
+$([ -n "{skipped_apply_failed}" ] && echo "Patch failed to apply: {skipped_apply_failed}.")"
+```
+
+Otherwise:
+```bash
+# Stage only the specific files touched by the applied patches.
+git add -- {patched_files}
+
+if git diff --cached --quiet; then
+  # Belt-and-suspenders: patches applied but nothing staged.
+  gh pr comment "$PR_NUMBER" --body "Patches applied locally but nothing staged — please report this as a bug."
+  exit 1
+fi
+
 # The workflow checks out the branch ref (not SHA) for fix triggers, so git push has a target.
-git add -A
-git commit -m "Apply tracked-review auto-fixes: {id list}"
-git push
+git commit -m "Apply tracked-review auto-fixes: {applied id list}"
+NEW_SHA=$(git rev-parse --short HEAD)
+git push || {
+  gh pr comment "$PR_NUMBER" \
+    --body "Fixes committed locally (SHA: \`$NEW_SHA\`) but push failed. Check branch protection rules or push manually."
+  exit 1
+}
 ```
 
 ### Step 5 — Update state and tracking comment
 
-For each applied fix: move item from `open` → `closed` (record new `COMMIT_SHA[0:7]` as `at`).
+For each applied fix: move item from `open` → `closed`, recording `NEW_SHA` (the fix-commit SHA captured above, not the workflow's `COMMIT_SHA`) as `at`.
 Rebuild and patch tracking comment with updated table and JSON state.
+
+If tracking comment update fails, post a recovery comment:
+```bash
+gh pr comment "$PR_NUMBER" --body "Fixes pushed (SHA: \`$NEW_SHA\`) but failed to update tracking comment. Items closed: {applied list}."
+```
 
 ### Step 6 — Post result comment
 
 ```bash
-gh pr comment "$PR_NUMBER" --body "Applied fixes: {applied list}. Skipped: {skipped list}. Commit: \`{sha}\`."
+gh pr comment "$PR_NUMBER" --body "Applied fixes: {applied list}. Commit: \`{NEW_SHA}\`.
+$([ -n "{skipped_already_fixed}" ] && echo "Already fixed (skipped): {skipped_already_fixed}.")
+$([ -n "{skipped_not_eligible}" ] && echo "Not eligible: {skipped_not_eligible}.")
+$([ -n "{skipped_unverifiable}" ] && echo "Could not verify (skipped): {skipped_unverifiable}.")
+$([ -n "{skipped_apply_failed}" ] && echo "Patch failed to apply: {skipped_apply_failed}.")"
 ```
 
 Do NOT re-run the full review. The tracking comment is already up to date.
