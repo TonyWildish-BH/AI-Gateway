@@ -63,11 +63,12 @@ jobs:
           elif [ "$EVENT" = "issue_comment" ]; then
             # Only act if comment is on a PR and body starts with a known command.
             TRIGGER_CMD=""
-            if echo "$COMMENT_BODY" | grep -qE '^/wontfix /[CSWI][0-9]+'; then
+            FIRST_LINE=$(printf '%s' "$COMMENT_BODY" | head -n1)
+            if echo "$FIRST_LINE" | grep -qE '^/wontfix /[CSWI][0-9]+'; then
               TRIGGER_CMD="wontfix"
-            elif echo "$COMMENT_BODY" | grep -qE '^/fix /[CSWI][0-9]+'; then
+            elif echo "$FIRST_LINE" | grep -qE '^/fix /[CSWI][0-9]+'; then
               TRIGGER_CMD="fix"
-            elif echo "$COMMENT_BODY" | grep -qE '^/ticket /[CSWI][0-9]+'; then
+            elif echo "$FIRST_LINE" | grep -qE '^/ticket /[CSWI][0-9]+'; then
               TRIGGER_CMD="ticket"
             fi
 
@@ -90,6 +91,10 @@ jobs:
 
             # Multi-line safe output for the comment body.
             DELIM=$(dd if=/dev/urandom bs=15 count=1 2>/dev/null | base64)
+            if [ -z "$DELIM" ]; then
+              echo "::error::Failed to generate random delimiter for GITHUB_OUTPUT"
+              exit 1
+            fi
             echo "wontfix-comment<<${DELIM}"          >> "$GITHUB_OUTPUT"
             echo "$COMMENT_BODY"                      >> "$GITHUB_OUTPUT"
             echo "${DELIM}"                           >> "$GITHUB_OUTPUT"
@@ -108,8 +113,9 @@ jobs:
       id-token: write    # Azure OIDC federation
 
     env:
-      # Claude Code authenticates via Azure Foundry (ChainedTokenCredential /
-      # AzureCliCredential). The azure/login step below makes this work.
+      # Claude Code authenticates via Azure Foundry using an explicit bearer
+      # token. The azure/login step establishes CLI credentials; the
+      # 'Get Foundry auth token' step below materialises ANTHROPIC_FOUNDRY_AUTH_TOKEN.
       CLAUDE_CODE_USE_FOUNDRY: 1
       ANTHROPIC_FOUNDRY_BASE_URL: ${{ secrets.AZURE_FOUNDRY_ENDPOINT }}
       ANTHROPIC_DEFAULT_SONNET_MODEL: claude-sonnet-4-6
@@ -133,8 +139,8 @@ jobs:
       - name: Get Foundry auth token
         run: |
           TOKEN=$(az account get-access-token --resource https://ai.azure.com --query accessToken -o tsv)
-          echo "::add-mask::$TOKEN"
           [ -n "$TOKEN" ] || { echo "::error::Failed to obtain Foundry auth token"; exit 1; }
+          echo "::add-mask::$TOKEN"
           echo "ANTHROPIC_FOUNDRY_AUTH_TOKEN=$TOKEN" >> $GITHUB_ENV
 
       - name: Checkout PR head
@@ -167,14 +173,14 @@ jobs:
           # Always surface output to job summary for visibility.
           {
             echo "## Claude review output (exit $CLAUDE_EXIT)"
-            echo '```'
+            echo '~~~'
             cat review-output.md || true
-            echo '```'
+            echo '~~~'
             if [ -s review-stderr.log ]; then
               echo "### stderr"
-              echo '```'
+              echo '~~~'
               cat review-stderr.log || true
-              echo '```'
+              echo '~~~'
             fi
           } >> "$GITHUB_STEP_SUMMARY"
 
