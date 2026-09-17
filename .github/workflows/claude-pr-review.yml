@@ -11,6 +11,7 @@ permissions:
   pull-requests: write
   issues: write      # needed to read/edit comments on issue_comment trigger
   id-token: write    # required for Azure OIDC federation
+  workflows: write   # /fix may patch .github/workflows/ files (job-level not supported)
 
 jobs:
   # Evaluate both trigger types and decide whether to proceed.
@@ -105,7 +106,6 @@ jobs:
       pull-requests: write
       issues: write
       id-token: write    # Azure OIDC federation
-      workflows: write   # /fix may patch .github/workflows/ files
 
     env:
       # Claude Code authenticates via Azure Foundry (ChainedTokenCredential /
