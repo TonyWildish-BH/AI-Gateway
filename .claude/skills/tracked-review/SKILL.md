@@ -12,7 +12,7 @@ Read the `TRIGGER_TYPE` environment variable and branch accordingly.
 - `ticket` → file a GitHub issue for a finding
 - `fix` → apply safe auto-fixes
 
-All env vars set by the workflow: `PR_NUMBER`, `PR_AUTHOR`, `TRIGGER_TYPE`, `WONTFIX_COMMENT`, `COMMIT_SHA`, `GITHUB_REPOSITORY`.
+All env vars set by the workflow: `PR_NUMBER`, `PR_AUTHOR`, `TRIGGER_TYPE`, `WONTFIX_COMMENT`, `COMMIT_SHA`, `GITHUB_REPOSITORY`, `PR_BASE_REF`.
 
 ---
 
