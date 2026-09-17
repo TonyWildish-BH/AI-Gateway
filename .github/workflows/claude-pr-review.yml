@@ -105,7 +105,7 @@ jobs:
       # AzureCliCredential). The azure/login step below makes this work.
       CLAUDE_CODE_USE_FOUNDRY: 1
       ANTHROPIC_FOUNDRY_BASE_URL: ${{ secrets.AZURE_FOUNDRY_ENDPOINT }}
-      ANTHROPIC_DEFAULT_SONNET_MODEL: claude-sonnet-4-6
+      ANTHROPIC_DEFAULT_SONNET_MODEL: claude-opus-5
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       # Passed to the tracked-review skill so it doesn't need to shell out
       # for these values.
