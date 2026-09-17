@@ -138,7 +138,7 @@ Status emojis: 🔴 open, ✅ fixed, 🚫 won't fix, 🎫 ticketed.
 |---|---|
 | ✅ Fixed since last run | /C1 /S3 |
 | 🚫 Won't fix auto-closed (now fixed) | /I2 |
-| 🎫 Fixed before ticket resolved | /S3 |
+| 🎫 Fixed before ticket resolved | /W8 |
 | 🔴 Still open | /W4 /W5 |
 | 🆕 New findings | /W6 /I7 |
 | 💡 Safe auto-fix available | /W4 /W6 /I8 |
@@ -160,7 +160,7 @@ Omit the "New findings" table and its header if no new findings this run. Omit r
 - In `last_run_open` but no longer open → "Fixed since last run"
 - New from Step 4 agents (not previously tracked) → "New findings"
 
-Wontfix-auto-closed and ticketed-now-fixed items (from Steps 2–3) are NOT in `last_run_open` and are NOT "New findings" — they belong to their own rows ('Won't fix auto-closed' and 'Fixed before ticket resolved') built directly from the Step 3 processing results.
+Wontfix-auto-closed and ticketed-now-fixed items (from Step 3) are NOT in `last_run_open` and are NOT "New findings" — they belong to their own rows ('Won't fix auto-closed' and 'Fixed before ticket resolved') built directly from the Step 3 processing results.
 
 If all items fixed and no new findings: "No open issues — PR is clear."
 
@@ -254,7 +254,7 @@ Build the known-findings list from `state.open + state.wontfix + state.ticketed`
 **Spawn if new types/classes/interfaces added:**
 - **type-design-analyzer** — invariant expression, encapsulation, enforcement
 
-After all Phase 1 agents have returned their findings, run a second sequential pass:
+After all parallel Step 4 agents have returned their findings, run a second sequential pass:
 
 **Step 4b — Patch polish (sequential, after all Step 4 agents complete):**
 - **code-simplifier** — polish/refine auto-fix patches; may update `patch` field for cleaner diffs
@@ -293,6 +293,9 @@ W=Warning(quality/risk), I=Informational(suggestion/style).
 
 fixable=true only when: single contiguous block in one file, no behavioural risk,
 pure refactor/syntax/typo/obvious guard. Include the patch as a unified diff.
+
+fixable=false always when: file is in `.github/workflows/` — GITHUB_TOKEN cannot
+push workflow file changes (blocked server-side); offering auto-fix would always fail.
 
 Return {"findings": []} if no new issues. Return ONLY the JSON object.
 ```
