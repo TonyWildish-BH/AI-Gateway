@@ -104,20 +104,20 @@ Schema:
 ```markdown
 ## PR Review Tracker
 
-| ID | Status | Severity | Summary | Location | Open |
-|----|--------|----------|---------|----------|------|
-| /C1 | ✅ fixed | Critical | Short summary | `file.py:42` | No |
-| /S3 | 🎫 ticketed | Severe | Short summary | `file.py:10` | Yes |
-| /W4 | 🔴 open | Warning | Short summary | `file.py:167` | Yes 💡 |
-| /I2 | 🚫 won't fix | Informational | Short summary | `file.py` | No |
+| ID | Status | Severity | Summary | Location |
+|----|--------|----------|---------|----------|
+| /C1 | ✅ | Critical | Short summary | `file.py:42` |
+| /S3 | 🎫 | Severe | Short summary | `file.py:10` |
+| /W4 | 🔴 💡 | Warning | Short summary | `file.py:167` |
+| /I2 | 🚫 | Informational | Short summary | `file.py` |
 
 <!-- review-state
 { ... JSON state ... }
 -->
 ```
 
-Rows sorted by severity (C → S → W → I), then by ID ascending within each severity. The 💡 on an open row means a safe auto-fix is available. Open column: "Yes" if status is open or ticketed, "No" if fixed or won't-fix.
-Status emojis: open=🔴, fixed=✅, won't fix=🚫, ticketed=🎫.
+Rows sorted by severity (C → S → W → I), then by ID ascending within each severity. The 💡 after the status emoji means a safe auto-fix is available.
+Status emojis: 🔴 open, ✅ fixed, 🚫 won't fix, 🎫 ticketed.
 
 ---
 
@@ -138,8 +138,11 @@ Status emojis: open=🔴, fixed=✅, won't fix=🚫, ticketed=🎫.
 | 💡 Safe auto-fix available | /fix /W4 /W6 |
 
 **New findings:**
-- `/W6` — Short summary of finding (`file.py:42`)
-- `/I7` — Short summary of finding (`other.py:10`)
+
+| ID | Severity | Summary | Location |
+|----|----------|---------|----------|
+| /W6 | Warning | Short summary of finding | `file.py:42` |
+| /I7 | Informational | Short summary of finding | `other.py:10` |
 
 See the [tracking comment](#) for full details.
 ```
