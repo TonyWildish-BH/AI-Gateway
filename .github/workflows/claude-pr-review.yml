@@ -7,7 +7,7 @@ on:
     types: [created]
 
 permissions:
-  contents: read
+  contents: write    # write needed for /fix to commit and push
   pull-requests: write
   issues: write      # needed to read/edit comments on issue_comment trigger
   id-token: write    # required for Azure OIDC federation
@@ -22,6 +22,7 @@ jobs:
       trigger-type:    ${{ steps.check.outputs.trigger-type }}
       pr-number:       ${{ steps.check.outputs.pr-number }}
       pr-head-sha:     ${{ steps.check.outputs.pr-head-sha }}
+      pr-head-ref:     ${{ steps.check.outputs.pr-head-ref }}
       pr-base-ref:     ${{ steps.check.outputs.pr-base-ref }}
       pr-author:       ${{ steps.check.outputs.pr-author }}
       wontfix-comment: ${{ steps.check.outputs.wontfix-comment }}
@@ -59,19 +60,30 @@ jobs:
             echo "wontfix-comment="                   >> "$GITHUB_OUTPUT"
 
           elif [ "$EVENT" = "issue_comment" ]; then
-            # Only act if comment is on a PR and body starts with /wontfix #N.
-            if [ "$IS_PR_COMMENT" = "false" ] || \
-               ! echo "$COMMENT_BODY" | grep -qE '^/wontfix #[0-9]+'; then
+            # Only act if comment is on a PR and body starts with a known command.
+            TRIGGER_CMD=""
+            if echo "$COMMENT_BODY" | grep -qE '^/wontfix /[CSWI][0-9]+'; then
+              TRIGGER_CMD="wontfix"
+            elif echo "$COMMENT_BODY" | grep -qE '^/fix /[CSWI][0-9]+'; then
+              TRIGGER_CMD="fix"
+            elif echo "$COMMENT_BODY" | grep -qE '^/ticket /[CSWI][0-9]+'; then
+              TRIGGER_CMD="ticket"
+            fi
+
+            if [ "$IS_PR_COMMENT" = "false" ] || [ -z "$TRIGGER_CMD" ]; then
               echo "should-run=false" >> "$GITHUB_OUTPUT"
               exit 0
             fi
 
-            PR_HEAD_SHA=$(gh api "repos/${{ github.repository }}/pulls/${ISSUE_NUMBER}" --jq '.head.sha')
+            PR_JSON=$(gh api "repos/${{ github.repository }}/pulls/${ISSUE_NUMBER}")
+            PR_HEAD_SHA=$(echo "$PR_JSON" | jq -r '.head.sha')
+            PR_HEAD_REF=$(echo "$PR_JSON" | jq -r '.head.ref')
 
             echo "should-run=true"                    >> "$GITHUB_OUTPUT"
-            echo "trigger-type=wontfix"               >> "$GITHUB_OUTPUT"
+            echo "trigger-type=${TRIGGER_CMD}"        >> "$GITHUB_OUTPUT"
             echo "pr-number=${ISSUE_NUMBER}"          >> "$GITHUB_OUTPUT"
             echo "pr-head-sha=${PR_HEAD_SHA}"         >> "$GITHUB_OUTPUT"
+            echo "pr-head-ref=${PR_HEAD_REF}"         >> "$GITHUB_OUTPUT"
             echo "pr-base-ref="                       >> "$GITHUB_OUTPUT"
             echo "pr-author=${COMMENT_AUTHOR}"        >> "$GITHUB_OUTPUT"
 
@@ -111,10 +123,16 @@ jobs:
           tenant-id:       ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
+      - name: Get Foundry auth token
+        run: |
+          TOKEN=$(az account get-access-token --resource https://ai.azure.com --query accessToken -o tsv)
+          echo "ANTHROPIC_FOUNDRY_AUTH_TOKEN=$TOKEN" >> $GITHUB_ENV
+
       - name: Checkout PR head
         uses: actions/checkout@v4
         with:
-          ref: ${{ needs.check-trigger.outputs.pr-head-sha }}
+          # fix trigger needs branch ref (not SHA) so git push has a target.
+          ref: ${{ needs.check-trigger.outputs.trigger-type == 'fix' && needs.check-trigger.outputs.pr-head-ref || needs.check-trigger.outputs.pr-head-sha }}
           fetch-depth: 0
 
       - name: Fetch base branch (push trigger only)
@@ -137,13 +155,21 @@ jobs:
           CLAUDE_EXIT=$?
           set -e
 
-          if [ "$CLAUDE_EXIT" -ne 0 ]; then
-            echo "::group::stdout ($(wc -c < review-output.md) bytes)"
+          # Always surface output to job summary for visibility.
+          {
+            echo "## Claude review output (exit $CLAUDE_EXIT)"
+            echo '```'
             cat review-output.md || true
-            echo "::endgroup::"
-            echo "::group::stderr ($(wc -c < review-stderr.log) bytes)"
-            cat review-stderr.log || true
-            echo "::endgroup::"
+            echo '```'
+            if [ -s review-stderr.log ]; then
+              echo "### stderr"
+              echo '```'
+              cat review-stderr.log || true
+              echo '```'
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          if [ "$CLAUDE_EXIT" -ne 0 ]; then
             echo "::error::claude CLI exited with code $CLAUDE_EXIT"
             exit 1
           fi
