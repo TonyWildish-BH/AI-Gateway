@@ -111,6 +111,8 @@ Schema:
 | /W4 | 🔴 💡 | Warning | Short summary | `file.py:167` |
 | /I2 | 🚫 | Informational | Short summary | `file.py` |
 
+**Commands:** `/wontfix /W4 reason` — dismiss · `/ticket /S3` — file GitHub issue · `/fix /W4 /W6` — auto-apply safe fixes
+
 <!-- review-state
 { ... JSON state ... }
 -->
