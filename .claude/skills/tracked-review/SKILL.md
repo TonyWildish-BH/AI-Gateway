@@ -197,6 +197,8 @@ If a ticketed item is now fixed anyway, note it in the update comment as "fixed 
 
 ### Step 4 — Fresh-findings pass (parallel specialist agents)
 
+Spawn all applicable agents simultaneously in a single parallel batch — do not wait for one to finish before starting the next.
+
 Determine changed files:
 ```bash
 git diff --name-only origin/$PR_BASE_REF...HEAD 2>/dev/null || \
