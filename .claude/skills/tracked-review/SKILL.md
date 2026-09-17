@@ -137,7 +137,7 @@ Status emojis: 🔴 open, ✅ fixed, 🚫 won't fix, 🎫 ticketed.
 | 🚫 Won't fix auto-closed (now fixed) | /I2 |
 | 🔴 Still open | /W4 /W5 |
 | 🆕 New findings | /W6 /I7 |
-| 💡 Safe auto-fix available | /fix /W4 /W6 |
+| 💡 Safe auto-fix available | /fix /W4 /W6 /I8 |
 
 **New findings:**
 
@@ -149,7 +149,7 @@ Status emojis: 🔴 open, ✅ fixed, 🚫 won't fix, 🎫 ticketed.
 See the [tracking comment](#) for full details.
 ```
 
-Omit the "New findings" table row and bullet list if no new findings this run. Omit rows with zero items. Omit the 💡 row if no fixable items.
+Omit the "New findings" table row and bullet list if no new findings this run. Omit rows with zero items. The 💡 row lists ALL open fixable items across the entire state (not just new ones this run) — omit only if none exist.
 If all items fixed and no new findings: "No open issues — PR is clear."
 
 ---
