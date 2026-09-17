@@ -59,9 +59,17 @@ jobs:
             echo "wontfix-comment="                   >> "$GITHUB_OUTPUT"
 
           elif [ "$EVENT" = "issue_comment" ]; then
-            # Only act if comment is on a PR and body starts with /wontfix #N.
-            if [ "$IS_PR_COMMENT" = "false" ] || \
-               ! echo "$COMMENT_BODY" | grep -qE '^/wontfix #[0-9]+'; then
+            # Only act if comment is on a PR and body starts with a known command.
+            TRIGGER_CMD=""
+            if echo "$COMMENT_BODY" | grep -qE '^/wontfix /[CSWI][0-9]+'; then
+              TRIGGER_CMD="wontfix"
+            elif echo "$COMMENT_BODY" | grep -qE '^/fix /[CSWI][0-9]+'; then
+              TRIGGER_CMD="fix"
+            elif echo "$COMMENT_BODY" | grep -qE '^/ticket /[CSWI][0-9]+'; then
+              TRIGGER_CMD="ticket"
+            fi
+
+            if [ "$IS_PR_COMMENT" = "false" ] || [ -z "$TRIGGER_CMD" ]; then
               echo "should-run=false" >> "$GITHUB_OUTPUT"
               exit 0
             fi
@@ -69,7 +77,7 @@ jobs:
             PR_HEAD_SHA=$(gh api "repos/${{ github.repository }}/pulls/${ISSUE_NUMBER}" --jq '.head.sha')
 
             echo "should-run=true"                    >> "$GITHUB_OUTPUT"
-            echo "trigger-type=wontfix"               >> "$GITHUB_OUTPUT"
+            echo "trigger-type=${TRIGGER_CMD}"        >> "$GITHUB_OUTPUT"
             echo "pr-number=${ISSUE_NUMBER}"          >> "$GITHUB_OUTPUT"
             echo "pr-head-sha=${PR_HEAD_SHA}"         >> "$GITHUB_OUTPUT"
             echo "pr-base-ref="                       >> "$GITHUB_OUTPUT"
