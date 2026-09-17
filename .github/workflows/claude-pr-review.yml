@@ -7,7 +7,7 @@ on:
     types: [created]
 
 permissions:
-  contents: read
+  contents: write    # write needed for /fix to commit and push
   pull-requests: write
   issues: write      # needed to read/edit comments on issue_comment trigger
   id-token: write    # required for Azure OIDC federation
@@ -22,6 +22,7 @@ jobs:
       trigger-type:    ${{ steps.check.outputs.trigger-type }}
       pr-number:       ${{ steps.check.outputs.pr-number }}
       pr-head-sha:     ${{ steps.check.outputs.pr-head-sha }}
+      pr-head-ref:     ${{ steps.check.outputs.pr-head-ref }}
       pr-base-ref:     ${{ steps.check.outputs.pr-base-ref }}
       pr-author:       ${{ steps.check.outputs.pr-author }}
       wontfix-comment: ${{ steps.check.outputs.wontfix-comment }}
@@ -74,12 +75,15 @@ jobs:
               exit 0
             fi
 
-            PR_HEAD_SHA=$(gh api "repos/${{ github.repository }}/pulls/${ISSUE_NUMBER}" --jq '.head.sha')
+            PR_JSON=$(gh api "repos/${{ github.repository }}/pulls/${ISSUE_NUMBER}")
+            PR_HEAD_SHA=$(echo "$PR_JSON" | jq -r '.head.sha')
+            PR_HEAD_REF=$(echo "$PR_JSON" | jq -r '.head.ref')
 
             echo "should-run=true"                    >> "$GITHUB_OUTPUT"
             echo "trigger-type=${TRIGGER_CMD}"        >> "$GITHUB_OUTPUT"
             echo "pr-number=${ISSUE_NUMBER}"          >> "$GITHUB_OUTPUT"
             echo "pr-head-sha=${PR_HEAD_SHA}"         >> "$GITHUB_OUTPUT"
+            echo "pr-head-ref=${PR_HEAD_REF}"         >> "$GITHUB_OUTPUT"
             echo "pr-base-ref="                       >> "$GITHUB_OUTPUT"
             echo "pr-author=${COMMENT_AUTHOR}"        >> "$GITHUB_OUTPUT"
 
@@ -127,7 +131,8 @@ jobs:
       - name: Checkout PR head
         uses: actions/checkout@v4
         with:
-          ref: ${{ needs.check-trigger.outputs.pr-head-sha }}
+          # fix trigger needs branch ref (not SHA) so git push has a target.
+          ref: ${{ needs.check-trigger.outputs.trigger-type == 'fix' && needs.check-trigger.outputs.pr-head-ref || needs.check-trigger.outputs.pr-head-sha }}
           fetch-depth: 0
 
       - name: Fetch base branch (push trigger only)
