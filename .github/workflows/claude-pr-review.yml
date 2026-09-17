@@ -7,7 +7,7 @@ on:
     types: [created]
 
 permissions:
-  contents: write    # write needed for /fix to commit and push
+  contents: read
   pull-requests: write
   issues: write      # needed to read/edit comments on issue_comment trigger
   id-token: write    # required for Azure OIDC federation
@@ -99,6 +99,13 @@ jobs:
     if: needs.check-trigger.outputs.should-run == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 20
+
+    permissions:
+      contents: write    # /fix needs to commit and push patches
+      pull-requests: write
+      issues: write
+      id-token: write    # Azure OIDC federation
+      workflows: write   # /fix may patch .github/workflows/ files
 
     env:
       # Claude Code authenticates via Azure Foundry (ChainedTokenCredential /
