@@ -126,6 +126,8 @@ jobs:
       - name: Get Foundry auth token
         run: |
           TOKEN=$(az account get-access-token --resource https://ai.azure.com --query accessToken -o tsv)
+          echo "::add-mask::$TOKEN"
+          [ -n "$TOKEN" ] || { echo "::error::Failed to obtain Foundry auth token"; exit 1; }
           echo "ANTHROPIC_FOUNDRY_AUTH_TOKEN=$TOKEN" >> $GITHUB_ENV
 
       - name: Checkout PR head
