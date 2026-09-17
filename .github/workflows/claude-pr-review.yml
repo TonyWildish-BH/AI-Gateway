@@ -138,8 +138,8 @@ jobs:
       - name: Get Foundry auth token
         run: |
           TOKEN=$(az account get-access-token --resource https://ai.azure.com --query accessToken -o tsv)
-          [ -n "$TOKEN" ] || { echo "::error::Failed to obtain Foundry auth token"; exit 1; }
           echo "::add-mask::$TOKEN"
+          [ -n "$TOKEN" ] || { echo "::error::Failed to obtain Foundry auth token"; exit 1; }
           echo "ANTHROPIC_FOUNDRY_AUTH_TOKEN=$TOKEN" >> $GITHUB_ENV
 
       - name: Checkout PR head
@@ -172,14 +172,14 @@ jobs:
           # Always surface output to job summary for visibility.
           {
             echo "## Claude review output (exit $CLAUDE_EXIT)"
-            echo '~~~'
+            echo '<pre>'
             cat review-output.md || true
-            echo '~~~'
+            echo '</pre>'
             if [ -s review-stderr.log ]; then
               echo "### stderr"
-              echo '~~~'
+              echo '<pre>'
               cat review-stderr.log || true
-              echo '~~~'
+              echo '</pre>'
             fi
           } >> "$GITHUB_STEP_SUMMARY"
 
