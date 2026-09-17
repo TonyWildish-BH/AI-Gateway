@@ -433,6 +433,7 @@ If any ID is not fixable or not found, post an error for that ID but continue wi
 ### Step 4 — Commit and push
 
 ```bash
+# The workflow checks out the branch ref (not SHA) for fix triggers, so git push has a target.
 git add -A
 git commit -m "Apply tracked-review auto-fixes: {id list}"
 git push
