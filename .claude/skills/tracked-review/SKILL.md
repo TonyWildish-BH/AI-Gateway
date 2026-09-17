@@ -138,6 +138,7 @@ Status emojis: 🔴 open, ✅ fixed, 🚫 won't fix, 🎫 ticketed.
 |---|---|
 | ✅ Fixed since last run | /C1 /S3 |
 | 🚫 Won't fix auto-closed (now fixed) | /I2 |
+| 🎫 Fixed before ticket resolved | /S3 |
 | 🔴 Still open | /W4 /W5 |
 | 🆕 New findings | /W6 /I7 |
 | 💡 Safe auto-fix available | /W4 /W6 /I8 |
@@ -154,10 +155,12 @@ See the [tracking comment](https://github.com/{GITHUB_REPOSITORY}/pull/{PR_NUMBE
 
 Omit the "New findings" table and its header if no new findings this run. Omit rows with zero items. The 💡 row lists ALL open fixable items across the entire state (not just new ones this run) — omit only if none exist.
 
-`last_run_open` is the set of open finding IDs from the end of the previous run. Use it to drive the update comment buckets:
+`last_run_open` is the set of open finding IDs from the end of the previous run. Use it to drive the update comment buckets for previously-open items:
 - In `last_run_open` and still open → "Still open"
 - In `last_run_open` but no longer open → "Fixed since last run"
-- Not in `last_run_open` → "New findings"
+- New from Step 4 agents (not previously tracked) → "New findings"
+
+Wontfix-auto-closed and ticketed-now-fixed items (from Steps 2–3) are NOT in `last_run_open` and are NOT "New findings" — they belong to their own rows ('Won't fix auto-closed' and 'Fixed before ticket resolved') built directly from the Step 3 processing results.
 
 If all items fixed and no new findings: "No open issues — PR is clear."
 
@@ -251,7 +254,9 @@ Build the known-findings list from `state.open + state.wontfix + state.ticketed`
 **Spawn if new types/classes/interfaces added:**
 - **type-design-analyzer** — invariant expression, encapsulation, enforcement
 
-**Spawn after the above agents complete** (operates on fixable candidates from their output):
+After all Phase 1 agents have returned their findings, run a second sequential pass:
+
+**Step 4b — Patch polish (sequential, after all Step 4 agents complete):**
 - **code-simplifier** — polish/refine auto-fix patches; may update `patch` field for cleaner diffs
 
 Agent prompt template:
