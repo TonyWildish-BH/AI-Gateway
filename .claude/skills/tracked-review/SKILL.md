@@ -121,7 +121,7 @@ Schema:
 -->
 ```
 
-Rows sorted by severity (C → S → W → I), then by ID ascending within each severity. The 💡 after the status emoji means a safe auto-fix is available.
+The table includes ALL findings across ALL state buckets — `open`, `closed`, `wontfix`, and `ticketed`. Never omit a row because an item is no longer open; the full history must remain visible. Rows sorted by severity (C → S → W → I), then by ID ascending within each severity. The 💡 after the status emoji means a safe auto-fix is available.
 Status emojis: 🔴 open, ✅ fixed, 🚫 won't fix, 🎫 ticketed.
 
 ---
