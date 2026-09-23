@@ -97,7 +97,7 @@ Schema:
 }
 ```
 
-`fixable`: true when finding meets auto-fix criteria (single block, one file, no behavioural risk).
+`fixable`: true when finding meets auto-fix criteria (single block, one file, no behavioural risk). Always false for files in `.github/workflows/` (GITHUB_TOKEN cannot push workflow changes).
 `patch`: stored unified diff — applied verbatim on `/fix`. Re-verified before apply.
 
 ---
@@ -138,7 +138,7 @@ Status emojis: 🔴 open, ✅ fixed, 🚫 won't fix, 🎫 ticketed.
 |---|---|
 | ✅ Fixed since last run | /C1 /S3 |
 | 🚫 Won't fix auto-closed (now fixed) | /I2 |
-| 🎫 Fixed before ticket resolved | /W8 |
+| 🎫 Fixed before ticket resolved | /W9 |
 | 🔴 Still open | /W4 /W5 |
 | 🆕 New findings | /W6 /I7 |
 | 💡 Safe auto-fix available | /W4 /W6 /I8 |

@@ -76,7 +76,11 @@ jobs:
               exit 0
             fi
 
-            PR_JSON=$(gh api "repos/${{ github.repository }}/pulls/${ISSUE_NUMBER}")
+            if ! PR_JSON=$(gh api "repos/${{ github.repository }}/pulls/${ISSUE_NUMBER}" 2>/tmp/gh_pr_err); then
+              echo "::error::Failed to fetch PR data: $(cat /tmp/gh_pr_err)"
+              echo "should-run=false" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
             PR_HEAD_SHA=$(echo "$PR_JSON" | jq -r '.head.sha')
             PR_HEAD_REF=$(echo "$PR_JSON" | jq -r '.head.ref')
 
