@@ -80,6 +80,20 @@ jobs:
             PR_HEAD_SHA=$(echo "$PR_JSON" | jq -r '.head.sha')
             PR_HEAD_REF=$(echo "$PR_JSON" | jq -r '.head.ref')
 
+            # Reject fork PRs — issue_comment runs with full secrets regardless of PR origin.
+            PR_HEAD_REPO=$(echo "$PR_JSON" | jq -r '.head.repo.full_name')
+            if [ "$PR_HEAD_REPO" != "$GITHUB_REPOSITORY" ]; then
+              echo "should-run=false" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+
+            # Reject comments from users without write access — anyone can comment on public PRs.
+            COMMENTER_PERM=$(gh api "repos/${GITHUB_REPOSITORY}/collaborators/${COMMENT_AUTHOR}/permission" --jq '.permission' 2>/dev/null || echo "none")
+            case "$COMMENTER_PERM" in
+              admin|write|maintain) ;;
+              *) echo "should-run=false" >> "$GITHUB_OUTPUT"; exit 0 ;;
+            esac
+
             echo "should-run=true"                    >> "$GITHUB_OUTPUT"
             echo "trigger-type=${TRIGGER_CMD}"        >> "$GITHUB_OUTPUT"
             echo "pr-number=${ISSUE_NUMBER}"          >> "$GITHUB_OUTPUT"
@@ -160,7 +174,8 @@ jobs:
       - name: Run tracked review
         # --dangerously-skip-permissions required: the skill uses Bash (git, gh),
         # Read, Write, and Agent tools in headless CI. Trust boundary: the
-        # check-trigger job above rejects draft PRs and fork PRs, so only
+        # check-trigger job rejects draft PRs, fork PRs (both pull_request and
+        # issue_comment paths), and non-write commenters, so only authorised
         # same-repo content reaches this step.
         run: |
           set +e
