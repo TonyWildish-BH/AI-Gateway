@@ -88,7 +88,15 @@ jobs:
             fi
 
             # Reject comments from users without write access — anyone can comment on public PRs.
-            COMMENTER_PERM=$(gh api "repos/${GITHUB_REPOSITORY}/collaborators/${COMMENT_AUTHOR}/permission" --jq '.permission' 2>/dev/null || echo "none")
+            if COMMENTER_PERM=$(gh api "repos/${GITHUB_REPOSITORY}/collaborators/${COMMENT_AUTHOR}/permission" --jq '.permission' 2>/tmp/gh_perm_err); then
+              : # success
+            elif grep -q '404' /tmp/gh_perm_err 2>/dev/null; then
+              COMMENTER_PERM="none"  # not a collaborator — expected
+            else
+              echo "::warning::Could not verify commenter permissions; defaulting to deny. $(cat /tmp/gh_perm_err)"
+              echo "should-run=false" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
             case "$COMMENTER_PERM" in
               admin|write|maintain) ;;
               *) echo "should-run=false" >> "$GITHUB_OUTPUT"; exit 0 ;;
@@ -188,12 +196,12 @@ jobs:
           {
             echo "## Claude review output (exit $CLAUDE_EXIT)"
             echo '<pre>'
-            cat review-output.md || true
+            sed 's/&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g' review-output.md || true
             echo '</pre>'
             if [ -s review-stderr.log ]; then
               echo "### stderr"
               echo '<pre>'
-              cat review-stderr.log || true
+              sed 's/&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g' review-stderr.log || true
               echo '</pre>'
             fi
           } >> "$GITHUB_STEP_SUMMARY"
